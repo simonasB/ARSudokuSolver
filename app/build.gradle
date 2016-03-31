@@ -25,6 +25,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
+    compile 'commons-io:commons-io:2.4'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
     // Testing-only dependencies
     // Force usage of support annotations in the test app, since it is internally used by the runner module.

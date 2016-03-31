@@ -3,9 +3,12 @@ package com.puzzleslab.arsudokusolver;
 /**
  * Created by Simonas on 2016-03-30.
  */
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.opencv.android.JavaCameraView;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -42,12 +45,10 @@ public class MainView extends JavaCameraView implements PictureCallback {
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
         Log.i(TAG, "Saving a bitmap to file");
-        // The camera preview was automatically stopped. Start it again.
         mCamera.startPreview();
-
         mCamera.setPreviewCallback(this);
         Mat mat = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
-        int a = mat.width();
+
         // Write the image in a file (in jpeg format)
         /*try {
             FileOutputStream fos = new FileOutputStream(mPictureFileName);
