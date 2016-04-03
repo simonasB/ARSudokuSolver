@@ -265,7 +265,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         return inputFrame.rgba();
     }
 
-    @SuppressLint("SimpleDateFormat")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         Log.i(TAG,"onTouch event");
