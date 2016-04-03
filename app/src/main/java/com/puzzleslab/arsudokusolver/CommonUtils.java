@@ -38,7 +38,7 @@ public final class CommonUtils {
         try {
             FileOutputStream fos = new FileOutputStream(path);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fos);
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             Log.e("PictureDemo", "Exception in photoCallback", e);
         }
     }
@@ -49,7 +49,7 @@ public final class CommonUtils {
             FileOutputStream fos = new FileOutputStream(path);
             fos.write(responseBytes);
             fos.close();
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             Log.e("PictureDemo", "Exception in photoCallback", e);
         }
     }
