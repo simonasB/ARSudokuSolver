@@ -15,6 +15,11 @@ import java.util.Map;
  * Created by Simonas on 2016-04-02.
  */
 public class SCandidate {
+    public SCandidate(int nr, FramePipeline framePipeline) {
+        this.nr = nr;
+        this.framePipeline = framePipeline;
+    }
+
     private int nr; // number of the frame
     private FramePipeline framePipeline;
 
@@ -54,8 +59,8 @@ public class SCandidate {
             }
             DigitLibrary mergedLibrary = SudokuUtils.mergeDigitLibrary(
                     sudokuCanvas, lastState.getDigitLibrary(), detectedScells);
-            Map<Integer, Map<Integer, Integer>> hitsToCompute = SudokuUtils.mergeHits(
-                    lastState.getHitCounters().getHitCounters(), sCellValues);
+            HitCounters hitsToCompute = SudokuUtils.mergeHits(
+                    lastState.getHitCounters(), sCellValues);
             Triplet<List<Character>, List<SCell>, SudokuState> triplet = SudokuUtils.computeSolution(
                     hitsToCompute, mergedLibrary, cap, minHits, maxSolvingDuration);
 

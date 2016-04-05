@@ -24,6 +24,7 @@ import org.opencv.imgproc.Imgproc;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class DigitRecognitionTest {

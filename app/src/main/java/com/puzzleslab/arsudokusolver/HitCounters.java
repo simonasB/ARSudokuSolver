@@ -6,21 +6,11 @@ import java.util.Map;
 /**
  * Created by Simonas on 2016-04-02.
  */
-public class HitCounters {
+// contains 81 elements, on each position the number of hits for the digit is counted
+// this means if for a cell 2 times a 3 is counted, the Map looks like this:
+// Map(... PosAtSudoku -> Map(3 -> 2) ...)
+public class HitCounters extends HashMap<Integer, Map<Integer, Integer>>{
     public HitCounters() {
-
+        super();
     }
-
-    public  HitCounters(Map<Integer, Map<Integer, Integer>> hitCounters) {
-        this.hitCounters = hitCounters;
-    }
-
-    public Map<Integer, Map<Integer, Integer>> getHitCounters() {
-        return hitCounters;
-    }
-
-    public void setHitCounters(Map<Integer, Map<Integer, Integer>> hitCounters) {
-        this.hitCounters = hitCounters;
-    }
-    private Map<Integer, Map<Integer, Integer>> hitCounters = new HashMap<>();
 }

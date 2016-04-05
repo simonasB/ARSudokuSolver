@@ -10,15 +10,11 @@ import java.util.Map;
 /**
  * Created by Simonas on 2016-04-02.
  */
-public class DigitLibrary {
-
-    public Map<Integer, Pair<Double, Mat>> getDigitLibrary() {
-        return digitLibrary;
+/**
+ * records for each number from 0 to 9 the best hit (quality) along with its digital data
+ */
+public class DigitLibrary extends HashMap<Integer, Pair<Double, Mat>>{
+    public DigitLibrary() {
+        super();
     }
-
-    public void setDigitLibrary(Map<Integer, Pair<Double, Mat>> digitLibrary) {
-        this.digitLibrary = digitLibrary;
-    }
-
-    private Map<Integer, Pair<Double, Mat>> digitLibrary = new HashMap<>();
 }

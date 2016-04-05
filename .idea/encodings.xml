@@ -1,25 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/BacktrackingKudokuSolver.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/BacktrackingSimpleSolver.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/BacktrackingUniqueSolverInProgress.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/CommonUtils.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/DigitLibrary.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/FramePipeline.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/HitCounters.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/ISudokuSolver.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/InputFrame.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/MainActivity.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/MainView.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/OpenCV.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/Parameters.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/SCandidate.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/SCell.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/SudokuState.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/SudokuUtils.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/TemplateLibrary.java" charset="windows-1257" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/puzzleslab/arsudokusolver/Triplet.java" charset="windows-1257" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

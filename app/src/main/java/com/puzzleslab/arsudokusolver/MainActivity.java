@@ -28,16 +28,18 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.os.Environment;
+import android.os.*;
+import android.renderscript.ScriptGroup;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements CvCameraViewListener2, OnTouchListener {
@@ -46,9 +48,16 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
-    private static final String TAG = "OCVSample::Activity";
+    private static final String TAG = "MainActivity";
 
-    private MainView mOpenCvCameraView;
+    private CameraBridgeViewBase cameraView;
+    private Button scanButton;
+    private int frameNr = 0;
+    private Mat solution;
+    private boolean calculationInProgress = false;
+    private DigitLibrary defaultLibrary = new DigitLibrary();
+    private HitCounters defaultHitCounts = new HitCounters();
+    private SudokuState currState = new SudokuState();
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -57,8 +66,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 case LoaderCallbackInterface.SUCCESS:
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
-                    mOpenCvCameraView.enableView();
-                    mOpenCvCameraView.setOnTouchListener(MainActivity.this);
+                    cameraView.enableView();
+                    cameraView.setOnTouchListener(MainActivity.this);
                 } break;
                 default:
                 {
@@ -79,20 +88,24 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.tutorial3_surface_view);
-
-        mOpenCvCameraView = (MainView) findViewById(R.id.tutorial3_activity_java_surface_view);
-
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-
-        mOpenCvCameraView.setCvCameraViewListener(this);
+        setContentView(R.layout.sudoku);
+        cameraView = (CameraBridgeViewBase) findViewById(R.id.sudoku);
+        cameraView.setVisibility(SurfaceView.VISIBLE);
+        cameraView.setCvCameraViewListener(this);
 
         verifyStoragePermissions(this);
 
-        Training();
-        TrainingAndTesting();
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currState = Parameters.DefaultState;
+                scanButton.setVisibility(View.GONE);
+                solution = null;
+            }
+        });
     }
 
+    // For understanding concept of necessary methods. Will be removed later.
     public void Training() {
         OpenCVLoader.initDebug();
         List<Integer> numbers = Arrays.asList(
@@ -146,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         CommonUtils.printMatToFile(response, Environment.getExternalStorageDirectory().getAbsolutePath() + "/label.yml");
     }
 
+    // For understanding concept of necessary methods. Will be removed later.
     public void TrainingAndTesting() {
         Mat thr = new Mat();
         Mat gray = new Mat();
@@ -227,13 +241,23 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             // permissions this app might request
         }
     }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
 
     @Override
     public void onPause()
     {
         super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+        if (cameraView != null)
+            cameraView.disableView();
     }
 
     @Override
@@ -249,10 +273,11 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         }
     }
 
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+        if (cameraView != null)
+            cameraView.disableView();
     }
 
     public void onCameraViewStarted(int width, int height) {
@@ -262,7 +287,28 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        return inputFrame.rgba();
+        if (solution != null) {
+            return solution;
+        } else {
+            if (!calculationInProgress) {
+                calculationInProgress = true;
+                Log.i(TAG, "Starting to find sudoku");
+                InputFrame result = detectSudoku(inputFrame);
+                return result.getFramePipeline().getFrame();
+                //TODO: Missing implementation if solution failed
+            } else {
+                Log.i(TAG, "Calculation in progress.");
+                return inputFrame.gray();
+            }
+        }
+    }
+
+    public InputFrame detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Mat frame = inputFrame.rgba();
+        frameNr++;
+        Pair<InputFrame, SudokuState> results = new SCandidate(frameNr, new FramePipeline(frame)).calc(Parameters.DefaultState, 8, 20, 5000L);
+        currState = results.second;
+        return results.first;
     }
 
     @Override
@@ -272,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         String currentDateandTime = sdf.format(new Date());
         String fileName = Environment.getExternalStorageDirectory().getPath() +
                 "/sample_picture_" + currentDateandTime + ".jpg";
-        mOpenCvCameraView.takePicture(fileName);
+        //mOpenCvCameraView.takePicture(fileName);
         Toast.makeText(this, fileName + " saved", Toast.LENGTH_SHORT).show();
         return false;
     }

@@ -26,7 +26,7 @@ public final class SudokuUtils {
     public static final DigitLibrary mergeDigitLibrary(Mat sudokuCanvas, DigitLibrary digitLibrary, List<SCell> detectedCells) {
         List<SCell> hits = new ArrayList<>();
         for (SCell sCell : detectedCells) {
-            if ((sCell.getValue() != 0) && (sCell.getQuality() < digitLibrary.getDigitLibrary().get(sCell.getValue()).first)) { // lower means "better"
+            if ((sCell.getValue() != 0) && (sCell.getQuality() < digitLibrary.get(sCell.getValue()).first)) { // lower means "better"
                 hits.add(sCell);
             }
         }
@@ -55,16 +55,15 @@ public final class SudokuUtils {
             }
             optimal.put(entry.getKey(), temp);
         }
-        Map<Integer, Pair<Double, Mat>> dLibrary = new HashMap<>();
+        DigitLibrary dLibrary = new DigitLibrary();
         for (Map.Entry<Integer, SCell> entry : optimal.entrySet()) {
             SCell sCell = entry.getValue();
-            if (digitLibrary.getDigitLibrary().get(sCell.getValue()).first > sCell.getQuality()) {
+            if (digitLibrary.get(sCell.getValue()).first > sCell.getQuality()) {
                 Mat newData = OpenCV.copyMat(sudokuCanvas.submat(sCell.getRoi()));
                 dLibrary.put(sCell.getValue(), new Pair<>(sCell.getQuality(), newData));
             }
         }
-        digitLibrary.setDigitLibrary(dLibrary);
-        return digitLibrary;
+        return dLibrary;
     }
 
     public static final MatOfPoint2f detectSudokuCorners(Mat input, int ratio) {
@@ -91,9 +90,9 @@ public final class SudokuUtils {
         }
     }
 
-    public static final Map<Integer, Map<Integer, Integer>> mergeHits(
-            Map<Integer, Map<Integer, Integer>> currentHitCounters, List<Integer> detections) {
-        Map<Integer, Map<Integer, Integer>> hitCounter = new HashMap<>();
+    public static final HitCounters mergeHits(
+            HitCounters currentHitCounters, List<Integer> detections) {
+        HitCounters hitCounter = new HitCounters();
         for (int i = 0; i < detections.size(); i++) {
             Map<Integer, Integer> frequencies = currentHitCounters.get(i);
             Map<Integer, Integer> mergedHits = new HashMap<>();
@@ -103,8 +102,8 @@ public final class SudokuUtils {
         return resetHitsIfThereAreTooMuchAmbiguities(hitCounter);
     }
 
-    public static final Map<Integer, Map<Integer, Integer>> resetHitsIfThereAreTooMuchAmbiguities(
-            Map<Integer, Map<Integer, Integer>> counters) {
+    public static final HitCounters resetHitsIfThereAreTooMuchAmbiguities(
+            HitCounters counters) {
         int cellAmbiguities = 0;
         for (Map.Entry<Integer, Map<Integer, Integer>> entry : counters.entrySet()) {
             if (entry.getValue().size() > Parameters.ambiguitiesCount) {
@@ -113,20 +112,20 @@ public final class SudokuUtils {
         }
         if (cellAmbiguities > Parameters.ambiCount) {
             Log.e(TAG, "Too many ambiguities " + cellAmbiguities + ", resetting...");
-            return Parameters.DefaultState.getHitCounters().getHitCounters();           //TODO: recheck HitCounters class logic. Looks strange getHitCounters().getHitCounters()
+            return Parameters.DefaultState.getHitCounters();           //TODO: recheck HitCounters class logic. Looks strange getHitCounters().getHitCounters()
         }
         return counters;
     }
 
     public static final Triplet<List<Character>, List<SCell>, SudokuState> computeSolution(
-            Map<Integer, Map<Integer, Integer>> hitCounters, DigitLibrary digitLibrary, int cap, int minHits, Long maxDuration) {
+            HitCounters hitCounters, DigitLibrary digitLibrary, int cap, int minHits, Long maxDuration) {
         Pair<List<Character>, SudokuState> solutionAndState = doIt(hitCounters, digitLibrary, cap, minHits, maxDuration);
         List<SCell> sCells = toSolutionCells(digitLibrary, solutionAndState.first);
         return new Triplet<>(solutionAndState.first, sCells, solutionAndState.second);
     }
 
     public static final Pair<List<Character>, SudokuState> doIt(
-            Map<Integer, Map<Integer, Integer>> hitCounters, DigitLibrary digitLibrary, int cap,
+            HitCounters hitCounters, DigitLibrary digitLibrary, int cap,
             int minHits, Long maxDuration) {
         int nrDetections = 0;
         for (Map.Entry<Integer, Map<Integer, Integer>> hitCounter: hitCounters.entrySet()) {
@@ -142,9 +141,9 @@ public final class SudokuUtils {
             List<Character> sudokuToSolve = mkSudokuMatrix(hitCounters, cap);
             String solvedSudoku = new BacktrackingSimpleSolver().solve(charListToString(sudokuToSolve));
             List<Character> solvedSudokuInCharsList = stringToCharList(solvedSudoku);
-            return new Pair<>(solvedSudokuInCharsList, new SudokuState(new HitCounters(hitCounters), digitLibrary));
+            return new Pair<>(solvedSudokuInCharsList, new SudokuState(hitCounters, digitLibrary));
         } else {
-            return new Pair<>(new ArrayList<>(), new SudokuState(new HitCounters(hitCounters), digitLibrary));
+            return new Pair<>(new ArrayList<>(), new SudokuState(hitCounters, digitLibrary));
         }
     }
 
@@ -164,7 +163,7 @@ public final class SudokuUtils {
         return chars;
     }
 
-    public static final List<Character> mkSudokuMatrix(Map<Integer, Map<Integer, Integer>> hitCounters, int cap) {
+    public static final List<Character> mkSudokuMatrix(HitCounters hitCounters, int cap) {
         List<Integer> values = new ArrayList<>();
         List<Character> chars = new ArrayList<>();
         for (int i = 0; i < Parameters.CELLCOUNT; i++) {

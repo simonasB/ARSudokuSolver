@@ -24,6 +24,8 @@ public final class TemplateLibrary {
 
     private static final Size templateSize = new Size(templateWidth, templateHeight);
 
+    public static final String TemplateResource = "templates.csv";
+
     private static final List<Mat> templatesList() {
         String csvFile = "templates.csv";
         BufferedReader br = null;
