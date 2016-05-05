@@ -1,8 +1,10 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Utils;
 
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.util.Log;
+
+import com.puzzleslab.arsudokusolver.BuildConfig;
 
 import org.apache.commons.io.FileUtils;
 import org.opencv.android.Utils;

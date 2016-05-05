@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Utils;
 
 import android.util.Log;
 import android.util.Pair;
@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,7 +71,7 @@ public final class TemplateLibrary {
         for (int i = 0; i < templatesList().size(); i++) {
             results.add(OpenCV.matchTemplate(resizedCandidate, i + 1, templatesList().get(i)));
         }
-        Collections.sort(results, (a, b) -> a.second.compareTo(b.second));
+        //Collections.sort(results, (a, b) -> a.second.compareTo(b.second));
 
         return results.get(results.size() - 1);
     }

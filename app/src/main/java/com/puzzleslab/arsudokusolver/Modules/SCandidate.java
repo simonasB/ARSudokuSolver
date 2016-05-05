@@ -1,6 +1,10 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Modules;
 
 import android.util.Pair;
+
+import com.puzzleslab.arsudokusolver.Utils.OpenCV;
+import com.puzzleslab.arsudokusolver.Utils.Parameters;
+import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -9,7 +13,6 @@ import org.opencv.core.Size;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Simonas on 2016-04-02.

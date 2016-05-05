@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Modules;
 
 import java.util.HashMap;
 import java.util.Map;

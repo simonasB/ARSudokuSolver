@@ -1,4 +1,6 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Modules;
+
+import com.puzzleslab.arsudokusolver.Modules.SCell;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;

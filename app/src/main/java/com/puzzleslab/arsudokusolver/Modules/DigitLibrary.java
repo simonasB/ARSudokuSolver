@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Modules;
 
 import android.util.Pair;
 

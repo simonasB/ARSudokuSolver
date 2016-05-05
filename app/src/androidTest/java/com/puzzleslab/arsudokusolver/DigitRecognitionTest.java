@@ -7,6 +7,8 @@ import android.os.Environment;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
+import com.puzzleslab.arsudokusolver.Utils.CommonUtils;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencv.android.OpenCVLoader;
@@ -24,7 +26,6 @@ import org.opencv.imgproc.Imgproc;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class DigitRecognitionTest {

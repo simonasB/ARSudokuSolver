@@ -1,9 +1,9 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Solvers;
 
 /**
  * Created by Simonas on 2016-03-11.
  */
-public class BacktrackingSimpleSolver implements ISudokuSolver {
+public class BacktrackingSimpleSolver implements SudokuSolver {
     /**
      * Sudoku row and column length
      */

@@ -1,6 +1,9 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Utils;
 
 import android.util.Pair;
+
+import com.puzzleslab.arsudokusolver.Modules.SCell;
+import com.puzzleslab.arsudokusolver.Modules.Triplet;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -14,7 +17,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -119,7 +121,7 @@ public final class OpenCV {
         for (MatOfPoint curve: curveList) {
             curvesAreas.add(new Pair<>(Imgproc.contourArea(curve), curve));
         }
-        Collections.sort(curvesAreas, (a, b) -> a.first.compareTo(b.first));
+        //Collections.sort(curvesAreas, (a, b) -> a.first.compareTo(b.first));
         return curvesAreas.get(0);
     }
 
@@ -149,9 +151,9 @@ public final class OpenCV {
     public static final MatOfPoint2f mkSortedCorners(MatOfPoint2f points) {
         List<Point> pointsAsList = points.toList();
         List<Point> sortedBySum = pointsAsList;
-        Collections.sort(sortedBySum, (l, r) -> (l.x + l.y) > (r.y + r.x) ? 1 : (l.x + l.y) < (r.y + r.x) ? -1 : 0);
+        //Collections.sort(sortedBySum, (l, r) -> (l.x + l.y) > (r.y + r.x) ? 1 : (l.x + l.y) < (r.y + r.x) ? -1 : 0);
         List<Point> sortedByDifference = pointsAsList;
-        Collections.sort(sortedByDifference, (l, r) -> (l.x - l.y) > (r.y - r.x) ? 1 : (l.x - l.y) < (r.y - r.x) ? -1 : 0);
+        //Collections.sort(sortedByDifference, (l, r) -> (l.x - l.y) > (r.y - r.x) ? 1 : (l.x - l.y) < (r.y - r.x) ? -1 : 0);
         Point topLeft = sortedBySum.get(0);
         Point bottomRight = sortedBySum.get(sortedBySum.size() - 1);
         Point topRight = sortedByDifference.get(0);
@@ -254,7 +256,7 @@ public final class OpenCV {
                 candidates.add(new Triplet<>(countourArea, curve, contour));
             }
         }
-        Collections.sort(candidates, (a, b) -> a.x.compareTo(b.x));
+        //Collections.sort(candidates, (a, b) -> a.x.compareTo(b.x));
 
         return candidates.get(candidates.size() - 1);
     }

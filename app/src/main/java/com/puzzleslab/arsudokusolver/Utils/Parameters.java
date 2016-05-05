@@ -1,4 +1,6 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Utils;
+
+import com.puzzleslab.arsudokusolver.Modules.SudokuState;
 
 /**
  * Created by Simonas on 2016-04-02.

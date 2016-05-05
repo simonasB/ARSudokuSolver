@@ -1,4 +1,7 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Modules;
+
+import com.puzzleslab.arsudokusolver.Modules.DigitLibrary;
+import com.puzzleslab.arsudokusolver.Modules.HitCounters;
 
 /**
  * Created by Simonas on 2016-04-02.

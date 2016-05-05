@@ -1,7 +1,14 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Utils;
 
 import android.util.Log;
 import android.util.Pair;
+
+import com.puzzleslab.arsudokusolver.Modules.DigitLibrary;
+import com.puzzleslab.arsudokusolver.Modules.HitCounters;
+import com.puzzleslab.arsudokusolver.Modules.SCell;
+import com.puzzleslab.arsudokusolver.Solvers.BacktrackingSimpleSolver;
+import com.puzzleslab.arsudokusolver.Modules.SudokuState;
+import com.puzzleslab.arsudokusolver.Modules.Triplet;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -10,12 +17,10 @@ import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Created by Simonas on 2016-04-02.
@@ -143,7 +148,8 @@ public final class SudokuUtils {
             List<Character> solvedSudokuInCharsList = stringToCharList(solvedSudoku);
             return new Pair<>(solvedSudokuInCharsList, new SudokuState(hitCounters, digitLibrary));
         } else {
-            return new Pair<>(new ArrayList<>(), new SudokuState(hitCounters, digitLibrary));
+            List<Character> emptyList = new ArrayList<>();
+            return new Pair<>(emptyList, new SudokuState(hitCounters, digitLibrary));
         }
     }
 
@@ -155,8 +161,8 @@ public final class SudokuUtils {
         return builder.toString();
     }
 
-    private static final List<Character> stringToCharList(String string) {
-        List<Character> chars = new ArrayList<>();
+    private static final ArrayList<Character> stringToCharList(String string) {
+        ArrayList<Character> chars = new ArrayList<>();
         for (char c : string.toCharArray()) {
             chars.add(c);
         }

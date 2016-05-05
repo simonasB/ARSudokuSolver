@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Modules;
 
 /**
  * Created by Simonas on 2016-04-03.

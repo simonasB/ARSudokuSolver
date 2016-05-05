@@ -1,9 +1,9 @@
-package com.puzzleslab.arsudokusolver;
+package com.puzzleslab.arsudokusolver.Solvers;
 
 /**
  * Created by Simonas on 2016-03-05.
  */
-public class BacktrackingKudokuSolver implements ISudokuSolver{
+public class BacktrackingKudokuSolver implements SudokuSolver {
     int[][] R, C;
     private void init() {
         R = new int[324][9];
