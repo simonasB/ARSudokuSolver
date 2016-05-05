@@ -1,5 +1,7 @@
 package com.puzzleslab.arsudokusolver.Modules;
 
+import android.nfc.Tag;
+import android.util.Log;
 import android.util.Pair;
 
 import com.puzzleslab.arsudokusolver.Utils.OpenCV;
@@ -10,6 +12,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
+import org.opencv.engine.OpenCVEngineInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +56,7 @@ public class SCandidate {
 
     private InputFrame sample = new InputFrame(nr , framePipeline);
 
-    public Pair<InputFrame, SudokuState> calc(SudokuState lastState, int cap, int minHits, Long maxSolvingDuration) {
+    public Pair<SSuccess, SudokuState> calc(SudokuState lastState, int cap, int minHits, Long maxSolvingDuration) {
         if (foundCorners) {
             List<SCell> detectedScells = getSCells();
             List<Integer> sCellValues = new ArrayList<>();
@@ -64,12 +67,23 @@ public class SCandidate {
                     sudokuCanvas, lastState.getDigitLibrary(), detectedScells);
             HitCounters hitsToCompute = SudokuUtils.mergeHits(
                     lastState.getHitCounters(), sCellValues);
-            Triplet<List<Character>, List<SCell>, SudokuState> triplet = SudokuUtils.computeSolution(
-                    hitsToCompute, mergedLibrary, cap, minHits, maxSolvingDuration);
 
+            Pair<List<Character>, SudokuState> solutionAndState = SudokuUtils.doIt(hitsToCompute, mergedLibrary, cap, minHits, maxSolvingDuration);
+            List<SCell> sCells = SudokuUtils.toSolutionCells(mergedLibrary, solutionAndState.first);
+
+            Mat withSolution = SudokuUtils.paintSolution(sudokuCanvas, sCells, solutionAndState.second.getDigitLibrary(), cellRects());
+
+            Mat unwarped = OpenCV.warp(withSolution, destCorners, corners);
+            Mat solutionMat = OpenCV.copySrcToDestWithMask(unwarped, framePipeline.getFrame(), unwarped);
+            SudokuFrame sudokuFrame = new SudokuFrame(sudokuCanvas, detectedScells, corners.toList());
+            SolutionFrame solutionFrame = new SolutionFrame(solutionAndState.first, solutionMat);
+
+            return new Pair<>(new SSuccess(sample, sudokuFrame, solutionFrame), solutionAndState.second);
+        } else {
+            Log.e("SCandidate", "Couldn't detect corners");
+            //TODO: Generate error dialog box or similar.
+            return null;
         }
-        //TODO: Finish implementation
-        return new Pair<>(new InputFrame(), new SudokuState());
     }
     /**
      * paints the solution to the canvas.

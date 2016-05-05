@@ -204,4 +204,23 @@ public final class SudokuUtils {
         }
         return allCells;
     }
+
+    public static final Mat paintSolution(Mat canvas, List<SCell> someSolution, DigitLibrary digitLibrary, List<Rect> rects) {
+        int cellsValuesSum = 0;
+        for(SCell cell : someSolution) {
+            cellsValuesSum += cell.getValue();
+        }
+        if(cellsValuesSum == Parameters.VALID_SUDOKU_CELLS_SUM) {
+            for(int i = 0; i < someSolution.size(); i++) {
+                int cellValue = someSolution.get(i).getValue();
+                Mat numberDigitalData = digitLibrary.get(cellValue).second;
+                if(numberDigitalData == null) {
+                    Log.w(TAG, "Number digital data in digit library could not be found. Digit " + cellValue);
+                } else {
+                    canvas = OpenCV.copyTo(digitLibrary.get(cellValue).second, canvas, rects.get(i));
+                }
+            }
+        }
+        return canvas;
+    }
 }

@@ -23,6 +23,7 @@ public final class Parameters {
 
     public static final int SSIZE = 9;
     public static final int CELLCOUNT = SSIZE * SSIZE;
+    public static final int VALID_SUDOKU_CELLS_SUM = 405;
 
     //public static final Range<Integer> range = Range.create(0, SSIZE - 1);
     //public static final Range<Integer> digitRange = Range.create(0, SSIZE);
