@@ -21,8 +21,8 @@ import android.widget.Button;
 import com.puzzleslab.arsudokusolver.Modules.DigitLibrary;
 import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
 import com.puzzleslab.arsudokusolver.Modules.HitCounters;
-import com.puzzleslab.arsudokusolver.Modules.InputFrame;
 import com.puzzleslab.arsudokusolver.Modules.SCandidate;
+import com.puzzleslab.arsudokusolver.Modules.SSuccess;
 import com.puzzleslab.arsudokusolver.Modules.SudokuState;
 import com.puzzleslab.arsudokusolver.R;
 import com.puzzleslab.arsudokusolver.Utils.Parameters;
@@ -178,27 +178,26 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        /*if (solution != null) {
+        if (solution != null) {
             return solution;
         } else {
             if (!calculationInProgress) {
                 calculationInProgress = true;
                 Log.i(TAG, "Starting to find sudoku");
-                InputFrame result = detectSudoku(inputFrame);
-                return result.getFramePipeline().getFrame();
+                SSuccess result = detectSudoku(inputFrame);
+                return result.getSolutionFrame().getSolutionMat();
                 //TODO: Missing implementation if solution failed
             } else {
                 Log.i(TAG, "Calculation in progress.");
                 return inputFrame.gray();
             }
-        }*/
-        return inputFrame.gray();
+        }
     }
 
-    public InputFrame detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public SSuccess detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat frame = inputFrame.rgba();
         frameNr++;
-        Pair<InputFrame, SudokuState> results = new SCandidate(frameNr, new FramePipeline(frame)).calc(Parameters.DefaultState, 8, 20, 5000L);
+        Pair<SSuccess, SudokuState> results = new SCandidate(frameNr, new FramePipeline(frame)).calc(Parameters.DefaultState, 8, 20, 5000L);
         currState = results.second;
         return results.first;
     }
