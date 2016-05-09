@@ -1,6 +1,5 @@
 package com.puzzleslab.arsudokusolver.Modules;
 
-import android.nfc.Tag;
 import android.util.Log;
 import android.util.Pair;
 
@@ -12,7 +11,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
-import org.opencv.engine.OpenCVEngineInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,22 +19,33 @@ import java.util.List;
  * Created by Simonas on 2016-04-02.
  */
 public class SCandidate {
-    public SCandidate(int nr, FramePipeline framePipeline) {
+    public SCandidate(int nr, FramePipeline framePipeline) throws SudokuException {
         this.nr = nr;
         this.framePipeline = framePipeline;
+        this.corners = SudokuUtils.detectSudokuCorners(framePipeline.getDilated(), 30);
+        this.foundCorners = !corners.empty();
+        if(!this.foundCorners) {
+            throw new SudokuException("Could not detect sudoku corners.", "CORNERS_NOT_FOUND");
+        }
+        this.destCorners = OpenCV.mkCorners(framePipeline.getFrame().size());
+        this.sudokuCanvas = OpenCV.warp(framePipeline.getFrame(), corners, destCorners);
+        this.cellSize = OpenCV.mkCellSize(sudokuCanvas.size());
+        this.cellWidth = ((int) cellSize.width);
+        this.cellHeight = ((int) cellSize.height);
+        this.sample = new InputFrame(nr , framePipeline);
     }
 
     private int nr; // number of the frame
     private FramePipeline framePipeline;
+    private MatOfPoint2f corners;
+    private boolean foundCorners;
+    private MatOfPoint2f destCorners;
+    private Mat sudokuCanvas;
+    private Size cellSize;
+    private int cellWidth;
+    private int cellHeight;
+    private InputFrame sample;
 
-    private MatOfPoint2f corners = SudokuUtils.detectSudokuCorners(framePipeline.getDilated(), 30);
-    private boolean foundCorners = !corners.empty();
-
-    private MatOfPoint2f destCorners = OpenCV.mkCorners(framePipeline.getFrame().size());
-    private Mat sudokuCanvas = OpenCV.warp(framePipeline.getFrame(), corners, destCorners);
-    private Size cellSize = OpenCV.mkCellSize(sudokuCanvas.size());
-    private int cellWidth = ((int) cellSize.width);
-    private int cellHeight = ((int) cellSize.height);
 
     private List<Rect> cellRects() {
         List<Rect> cellRects = new ArrayList<>();
@@ -53,8 +62,6 @@ public class SCandidate {
         }
         return sCells;
     }
-
-    private InputFrame sample = new InputFrame(nr , framePipeline);
 
     public Pair<SSuccess, SudokuState> calc(SudokuState lastState, int cap, int minHits, Long maxSolvingDuration) {
         if (foundCorners) {
@@ -84,29 +91,5 @@ public class SCandidate {
             //TODO: Generate error dialog box or similar.
             return null;
         }
-    }
-    /**
-     * paints the solution to the canvas.
-     *
-     * returns the modified canvas with the solution painted upon.
-     *
-     * detectedCells contains values from 0 to 9, with 0 being the cells which are 'empty' and thus have to be filled up
-     * with numbers.
-     *
-     * uses digitData as lookup table to paint onto the canvas, thus modifying the canvas.
-     */
-    public static final Mat paintSolution(Mat canvas, List<Integer> detectedCells,
-                                          List<SCell> solution, DigitLibrary digitLibrary, List<Rect> rects) {
-        List<Integer> values = new ArrayList<>();
-        int sum = 0;
-        for (SCell cell : solution) {
-            int value = cell.getValue();
-            values.add(value);
-            sum += value;
-        }
-        if(sum == 405) {
-            //TODO: Finish implementation
-        }
-        return new Mat();
     }
 }

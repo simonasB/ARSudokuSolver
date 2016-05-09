@@ -10,7 +10,6 @@ public class InputFrame {
     private FramePipeline framePipeline;
 
     public InputFrame() {
-
     }
 
     public InputFrame(int nr, FramePipeline framePipeline) {

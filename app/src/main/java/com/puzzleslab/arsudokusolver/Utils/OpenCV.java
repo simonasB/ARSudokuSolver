@@ -17,6 +17,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -121,7 +123,13 @@ public final class OpenCV {
         for (MatOfPoint curve: curveList) {
             curvesAreas.add(new Pair<>(Imgproc.contourArea(curve), curve));
         }
-        //Collections.sort(curvesAreas, (a, b) -> a.first.compareTo(b.first));
+        Comparator<Pair<Double, MatOfPoint>> comparator = new Comparator<Pair<Double, MatOfPoint>>() {
+            @Override
+            public int compare(Pair<Double, MatOfPoint> lhs, Pair<Double, MatOfPoint> rhs) {
+                return rhs.first.compareTo(lhs.first);
+            }
+        };
+        Collections.sort(curvesAreas, comparator);
         return curvesAreas.get(0);
     }
 
