@@ -14,9 +14,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.PopupWindow;
+import android.view.ViewGroup.LayoutParams;
 
 import com.puzzleslab.arsudokusolver.Modules.DigitLibrary;
 import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
@@ -206,8 +210,33 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return results.first;
         } catch (SudokuException e) {
             //TODO: Create popup window to show error for user
+            initPopup();
             scanButton.setVisibility(View.VISIBLE);
             return null;
         }
+    }
+
+    private void initPopup() {
+        LayoutInflater layoutInflater = (LayoutInflater)getBaseContext()
+                .getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = layoutInflater.inflate(R.layout.popup, null);
+        final PopupWindow popupWindow = new PopupWindow(
+                popupView,
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
+
+        Button btnDismiss = (Button)popupView.findViewById(R.id.dismiss);
+        btnDismiss.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                popupWindow.showAtLocation(cameraView, Gravity.CENTER, 0, 0);
+            }
+        });
     }
 }
