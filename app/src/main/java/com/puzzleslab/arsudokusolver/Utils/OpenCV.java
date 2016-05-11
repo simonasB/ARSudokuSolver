@@ -153,20 +153,33 @@ public final class OpenCV {
     }
 
     public static final boolean has4Sides(MatOfPoint2f needle) {
-        return needle.size() == new Size(1, 4);
+        return needle.size().equals(new Size(1, 4));
     }
 
     public static final MatOfPoint2f mkSortedCorners(MatOfPoint2f points) {
         List<Point> pointsAsList = points.toList();
-        List<Point> sortedBySum = pointsAsList;
-        //Collections.sort(sortedBySum, (l, r) -> (l.x + l.y) > (r.y + r.x) ? 1 : (l.x + l.y) < (r.y + r.x) ? -1 : 0);
-        List<Point> sortedByDifference = pointsAsList;
-        //Collections.sort(sortedByDifference, (l, r) -> (l.x - l.y) > (r.y - r.x) ? 1 : (l.x - l.y) < (r.y - r.x) ? -1 : 0);
-        Point topLeft = sortedBySum.get(0);
-        Point bottomRight = sortedBySum.get(sortedBySum.size() - 1);
-        Point topRight = sortedByDifference.get(0);
-        Point bottomLeft = sortedByDifference.get(sortedByDifference.size() - 1);
-        return new MatOfPoint2f(topLeft, topRight, bottomRight, bottomLeft);
+        Comparator<Point> comparatorBySum = new Comparator<Point>() {
+            @Override
+            public int compare(Point lhs, Point rhs) {
+                return (lhs.x + lhs.y) > (rhs.y + rhs.x) ? 1 : (lhs.x + lhs.y) < (rhs.y + rhs.x) ? -1 : 0;
+            }
+        };
+        Collections.sort(pointsAsList, comparatorBySum);
+        /*List<Point> sortedByDifference = pointsAsList;
+        Comparator<Point> comparatorByDifference = new Comparator<Point>() {
+            @Override
+            public int compare(Point lhs, Point rhs) {
+                return (lhs.x - lhs.y) > (rhs.y - rhs.x) ? 1 : (lhs.x - lhs.y) < (rhs.y - rhs.x) ? -1 : 0;
+            }
+        };
+        Collections.sort(sortedByDifference, comparatorByDifference);
+        */
+        Point bottomLeft = pointsAsList.get(0);
+        Point topLeft = pointsAsList.get(1);
+        Point bottomRight = pointsAsList.get(2);
+        Point topRight = pointsAsList.get(3);
+
+        return new MatOfPoint2f(bottomLeft, bottomRight, topRight, topLeft);
     }
 
     private static final double calcAngle(Point a, Point b) {
@@ -175,13 +188,14 @@ public final class OpenCV {
 
     public static final boolean isSomewhatSquare(List<Point> corners) {
         return Math.abs(calcAngle(corners.get(0), corners.get(1)) - calcAngle(corners.get(3), corners.get(2))) < 10 &&
-                Math.abs(calcAngle(corners.get(1), corners.get(3)) - calcAngle(corners.get(1), corners.get(2))) < 10;
+                Math.abs(calcAngle(corners.get(0), corners.get(3)) - calcAngle(corners.get(1), corners.get(2))) < 10;
     }
 
     public static final Mat warp(Mat input, MatOfPoint2f srcCorners, MatOfPoint2f destCorners) {
         Mat transformationMatrix = Imgproc.getPerspectiveTransform(srcCorners, destCorners);
         Mat dest = new Mat();
         Imgproc.warpPerspective(input, dest, transformationMatrix, input.size());
+        CommonUtils.printMatToPicture(dest, "storage/emulated/0/warped.jpg");
         return dest;
     }
 
@@ -189,20 +203,28 @@ public final class OpenCV {
         return new Size(sudokuSize.width / Parameters.SSIZE, sudokuSize.height / Parameters.SSIZE);
     }
 
-    public static final SCell detectCell(Mat sudokuPlane, Rect roi) {
+    public static final SCell detectCell(Mat sudokuPlane, Rect roi, TemplateLibrary templateLibrary) {
+        int i = 1;
         Mat contour = extractContour(sudokuPlane.submat(roi));
-        Pair<Integer, Double> valueAndQuality = TemplateLibrary.detectNumber(contour);
+        //CommonUtils.printMatToPicture(sudokuPlane.submat(roi), "storage/emulated/0/cell" + i++ + ".jpg");
+        if(contour == null) {
+            return new SCell(0, 0.0, roi);
+        }
+        Pair<Integer, Double> valueAndQuality = templateLibrary.detectNumber(contour);
         return new SCell(valueAndQuality.first, valueAndQuality.second, roi);
     }
 
     public static final Mat extractContour(Mat coloredCell) {
+        CommonUtils.printMatToPicture(coloredCell, "storage/emulated/0/coloredCell.jpg");
         Mat cell = toGray(coloredCell);
         Mat cellData = getCellData(cell);
+        CommonUtils.printMatToPicture(cellData, "storage/emulated/0/cellData.jpg");
         Point center = calcCellCentre(cellData);
         Pair<Double, Double> minMaxArea = minMaxArea(cellData);
         double minArea = minMaxArea.first;
         double maxArea = minMaxArea.second;
-        Mat preprocessed = preprocess(cellData);
+        Mat preprocessed = preprocess(toGray(cellData));
+        CommonUtils.printMatToPicture(preprocessed, "storage/emulated/0/preprocessed.jpg");
         return findCellContour(preprocessed, center, minArea, maxArea);
     }
 
@@ -225,9 +247,13 @@ public final class OpenCV {
 
     public static final Mat preprocess(Mat input) {
         Mat equalized = equalizeHist(input);
+        CommonUtils.printMatToPicture(equalized, "storage/emulated/0/equalized.jpg");
         Mat blurred = gaussianBlur(equalized);
+        CommonUtils.printMatToPicture(equalized, "storage/emulated/0/blurred.jpg");
         Mat thresholded = threshold(blurred);
+        CommonUtils.printMatToPicture(thresholded, "storage/emulated/0/thresholded.jpg");
         Mat inverted = bitwiseNot(thresholded);
+        CommonUtils.printMatToPicture(inverted, "storage/emulated/0/inverted.jpg");
         return inverted;
     }
 
@@ -239,7 +265,7 @@ public final class OpenCV {
 
     public static final Mat threshold(Mat input) {
         Mat output = new Mat();
-        Imgproc.threshold(input, output, 30, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(input, output, 160, 255, Imgproc.THRESH_BINARY);
         return output;
     }
 
@@ -247,13 +273,16 @@ public final class OpenCV {
         Mat input = new Mat();
         original.copyTo(input);
         List<MatOfPoint> contours = coreFindContours(input);
-        Triplet<Double, MatOfPoint2f, MatOfPoint> bestFit = findBestFit(contours, center, minArea, maxArea);
-        return original.submat(Imgproc.boundingRect(bestFit.z));
+        MatOfPoint bestFit = findBestFit(contours, center, minArea, maxArea);
+        if(bestFit == null) {
+            return null;
+        }
+        return original.submat(Imgproc.boundingRect(bestFit));
     }
 
-    public static final Triplet<Double, MatOfPoint2f, MatOfPoint> findBestFit(
+    public static final MatOfPoint findBestFit(
             List<MatOfPoint> contours, Point center, double minArea, double maxArea) {
-        List<Triplet<Double, MatOfPoint2f, MatOfPoint>> candidates = new ArrayList<>();
+        List<Pair<Double, MatOfPoint>> candidates = new ArrayList<>();
         for (MatOfPoint contour: contours) {
             Rect boundingRect = Imgproc.boundingRect(contour);
             double area = boundingRect.area();
@@ -261,12 +290,22 @@ public final class OpenCV {
                 MatOfPoint2f curve = new MatOfPoint2f();
                 curve.fromArray(contour.toArray());
                 double countourArea = Imgproc.contourArea(curve);
-                candidates.add(new Triplet<>(countourArea, curve, contour));
+                candidates.add(new Pair<>(countourArea, contour));
             }
         }
-        //Collections.sort(candidates, (a, b) -> a.x.compareTo(b.x));
+        Comparator<Pair<Double, MatOfPoint>> comparator = new Comparator<Pair<Double, MatOfPoint>>() {
+            @Override
+            public int compare(Pair<Double, MatOfPoint> lhs, Pair<Double, MatOfPoint> rhs) {
+                return lhs.first.compareTo(rhs.first);
+            }
+        };
+        Collections.sort(candidates, comparator);
 
-        return candidates.get(candidates.size() - 1);
+        if(candidates.size() == 0) {
+            return null;
+        }
+
+        return candidates.get(candidates.size() - 1).second;
     }
 
     public static final Mat copyMat(Mat orig) {

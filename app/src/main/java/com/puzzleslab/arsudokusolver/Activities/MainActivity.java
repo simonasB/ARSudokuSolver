@@ -30,6 +30,7 @@ import com.puzzleslab.arsudokusolver.Modules.SSuccess;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
 import com.puzzleslab.arsudokusolver.Modules.SudokuState;
 import com.puzzleslab.arsudokusolver.R;
+import com.puzzleslab.arsudokusolver.Utils.CommonUtils;
 import com.puzzleslab.arsudokusolver.Utils.Parameters;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
@@ -202,14 +203,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public SSuccess detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat frame = inputFrame.rgba();
+        //Mat frame = inputFrame.rgba();
+        Mat frame = CommonUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku.png", "");
         frameNr++;
         try {
-            Pair<SSuccess, SudokuState> results = new SCandidate(frameNr, new FramePipeline(frame)).calc(Parameters.DefaultState, 8, 20, 5000L);
+            Pair<SSuccess, SudokuState> results = new SCandidate(frameNr, new FramePipeline(frame), getBaseContext()).calc(Parameters.DefaultState, 8, 20, 5000L);
             currState = results.second;
             return results.first;
         } catch (SudokuException e) {
-            //TODO: Create popup window to show error for user
             initPopup();
             scanButton.setVisibility(View.VISIBLE);
             return null;
