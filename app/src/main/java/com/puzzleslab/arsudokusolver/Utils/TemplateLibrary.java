@@ -30,57 +30,64 @@ public class TemplateLibrary {
     }
 
     private static final String TAG = "TemplateLibrary";
-    private static final double templateWidth = 50.0;
-    private static final double templateHeight = 25.0;
+    private static final double templateWidth = 25.0;
+    private static final double templateHeight = 50.0;
     private Size templateSize;
     private Context context;
+    private List<Mat> digitsTemplates;
 
-    private List<Mat> templatesList() {
-        String csvFile = "templates";
-        InputStream inputStream = context.getResources().openRawResource(context.getResources().getIdentifier(csvFile, "raw", context.getPackageName()));
-        BufferedReader br = null;
-        String line;
-        String cvsSplitBy = ",";
-        List<Integer[]> digits = new ArrayList<>();
-        int i = 0;
-        List<Mat> matList = new ArrayList<>();
-        try {
-            br = new BufferedReader(new InputStreamReader(inputStream));
-            while ((line = br.readLine()) != null) {
-                // use comma as separator
-                String[] numbers = line.split(cvsSplitBy);
-                for (int j = 0; j < numbers.length; j++) {
-                    if (numbers[j] == "0") {
-                        digits.get(i)[j] = 0;
+
+    public List<Mat> getDigitsTemplates() {
+        if(digitsTemplates == null) {
+            String csvFile = "templates";
+            InputStream inputStream = context.getResources().openRawResource(context.getResources().getIdentifier(csvFile, "raw", context.getPackageName()));
+            BufferedReader br = null;
+            String line;
+            String cvsSplitBy = ",";
+            List<Mat> digitsTemplates = new ArrayList<>();
+            try {
+                br = new BufferedReader(new InputStreamReader(inputStream));
+                while ((line = br.readLine()) != null) {
+                    // use comma as separator
+                    String[] numbers = line.split(cvsSplitBy);
+                    Integer[] digitBytes = new Integer[numbers.length];
+                    for (int j = 0; j < numbers.length; j++) {
+                        if (numbers[j].compareTo("0") == 0) {
+                            digitBytes[j] = 0;
+                        }
+                        else {
+                            digitBytes[j] = 255;
+                        }
                     }
-                    else {
-                        digits.get(i)[j] = 255;
+                    digitsTemplates.add(OpenCV.toMat(digitBytes, templateSize));
+                }
+                Log.e(TAG, "aaaa");
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Could not find " + csvFile, e);
+            } catch (IOException e) {
+                Log.e(TAG, "Unexpected error occured.", e);
+            } finally {
+                if (br != null) {
+                    try {
+                        inputStream.close();
+                        br.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, "Unexpected error occured while closing file.", e);
                     }
                 }
-                i++;
             }
-            matList.add(OpenCV.toMat(digits.get(i), templateSize));
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "Could not find " + csvFile, e);
-        } catch (IOException e) {
-            Log.e(TAG, "Unexpected error occured.", e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "Unexpected error occured while closing file.", e);
-                }
-            }
+            this.digitsTemplates = digitsTemplates;
         }
-        return matList;
+        return digitsTemplates;
     }
 
     public Pair<Integer, Double> detectNumber(Mat candidate) {
         Mat resizedCandidate = OpenCV.resize(candidate, templateSize); // since templates are 25 x 50
         List<Pair<Integer, Double>> results = new ArrayList<>();
-        for (int i = 0; i < templatesList().size(); i++) {
-            results.add(OpenCV.matchTemplate(resizedCandidate, i + 1, templatesList().get(i)));
+        for (int i = 0; i < getDigitsTemplates().size(); i++) {
+            CommonUtils.printMatToPicture(getDigitsTemplates().get(i), "template" + (i + 1) + ".png" );
+            CommonUtils.printMatToPicture(resizedCandidate, "resizedCandidate.png" );
+            results.add(OpenCV.matchTemplate(resizedCandidate, i + 1, getDigitsTemplates().get(i)));
         }
         Comparator<Pair<Integer, Double>> comparator = new Comparator<Pair<Integer, Double>>() {
             @Override
@@ -90,6 +97,6 @@ public class TemplateLibrary {
         };
         Collections.sort(results, comparator);
 
-        return results.get(results.size() - 1);
+        return results.get(0);
     }
 }

@@ -13,7 +13,6 @@ import android.os.*;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,16 +21,11 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 import android.view.ViewGroup.LayoutParams;
 
-import com.puzzleslab.arsudokusolver.Modules.DigitLibrary;
 import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
-import com.puzzleslab.arsudokusolver.Modules.HitCounters;
 import com.puzzleslab.arsudokusolver.Modules.SCandidate;
-import com.puzzleslab.arsudokusolver.Modules.SSuccess;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
-import com.puzzleslab.arsudokusolver.Modules.SudokuState;
 import com.puzzleslab.arsudokusolver.R;
 import com.puzzleslab.arsudokusolver.Utils.CommonUtils;
-import com.puzzleslab.arsudokusolver.Utils.Parameters;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -43,12 +37,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private CameraBridgeViewBase cameraView;
     private Button scanButton;
-    private int frameNr = 0;
-    private Mat solution;
-    private boolean calculationInProgress = false;
-    private DigitLibrary defaultLibrary = new DigitLibrary();
-    private HitCounters defaultHitCounts = new HitCounters();
-    private SudokuState currState = new SudokuState();
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -91,9 +79,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currState = Parameters.DefaultState;
                 scanButton.setVisibility(View.GONE);
-                solution = null;
             }
         });
     }
@@ -184,32 +170,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        if (solution != null) {
-            return solution;
-        } else {
-            if (!calculationInProgress) {
-                calculationInProgress = true;
-                Log.i(TAG, "Starting to find sudoku");
-                SSuccess result = detectSudoku(inputFrame);
-                if(result == null) {
-                    return null;
-                }
-                return result.getSolutionFrame().getSolutionMat();
-            } else {
-                Log.i(TAG, "Calculation in progress.");
-                return inputFrame.gray();
-            }
+        Log.i(TAG, "Starting to find sudoku");
+        Mat solution = detectSudoku(inputFrame);
+        if (solution == null) {
+            return null;
         }
+        return solution;
     }
 
-    public SSuccess detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public Mat detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         //Mat frame = inputFrame.rgba();
         Mat frame = CommonUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku.png", "");
-        frameNr++;
         try {
-            Pair<SSuccess, SudokuState> results = new SCandidate(frameNr, new FramePipeline(frame), getBaseContext()).calc(Parameters.DefaultState, 8, 20, 5000L);
-            currState = results.second;
-            return results.first;
+            Mat solution = new SCandidate(new FramePipeline(frame), getBaseContext()).calc();
+            return solution;
         } catch (SudokuException e) {
             initPopup();
             scanButton.setVisibility(View.VISIBLE);

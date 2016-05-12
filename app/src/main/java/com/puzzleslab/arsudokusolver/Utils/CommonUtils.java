@@ -34,11 +34,12 @@ public final class CommonUtils {
         return Imgcodecs.imdecode(new MatOfByte(bytes), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
     }
 
-    public static void printMatToPicture(Mat mat, String path) {
+    public static void printMatToPicture(Mat mat, String imgName) {
+        String externalStoragePath = "storage/1307-3A05/" + imgName;
         Bitmap bitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(mat, bitmap);
         try {
-            FileOutputStream fos = new FileOutputStream(path);
+            FileOutputStream fos = new FileOutputStream(externalStoragePath);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fos);
         } catch (IOException e) {
             Log.e("PictureDemo", "Exception in photoCallback", e);

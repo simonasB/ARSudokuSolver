@@ -16,6 +16,8 @@ import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,11 +36,14 @@ public final class OpenCV {
 
     public static final Mat toMat(Integer[] buffer, int width, int height) {
         Mat m = new Mat(height, width, CvType.CV_8UC1);
-        byte[] b = new byte[0];
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+        byteBuffer.order(ByteOrder.nativeOrder());
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                b[0] = buffer[i + width * j].byteValue();
-                m.put(j, i, b);
+                byteBuffer.putInt(buffer[i + width * j]);
+                byteBuffer.flip();
+                m.put(j, i, byteBuffer.array());
+                byteBuffer.clear(); // Otherwise buffer overflows
             }
         }
         return m;
@@ -54,6 +59,9 @@ public final class OpenCV {
         Mat normedCandidateF = norm(candidate);
         Mat normedNeedleF = norm(withNeedle);
 
+        CommonUtils.printMatToPicture(normedCandidateF, "normedCandidateF.png");
+        CommonUtils.printMatToPicture(normedNeedleF, "normedNeedleF" + number + ".png");
+
         int width = candidate.cols() - withNeedle.cols() + 1;
         int height = candidate.rows() - withNeedle.rows() + 1;
         Mat resultImage = new Mat(width, height, CvType.CV_32FC1);
@@ -64,7 +72,7 @@ public final class OpenCV {
     }
 
     public static final Mat norm(Mat mat) {
-        return adaptiveThreshold(dilate(gaussianBlur(mat)), 255, 9); // not sure if this is correct
+        return adaptiveThreshold(dilate(gaussianBlur(mat)), 255, 5); // not sure if this is correct
     }
 
     public static final Mat gaussianBlur(Mat input) {
@@ -195,7 +203,7 @@ public final class OpenCV {
         Mat transformationMatrix = Imgproc.getPerspectiveTransform(srcCorners, destCorners);
         Mat dest = new Mat();
         Imgproc.warpPerspective(input, dest, transformationMatrix, input.size());
-        CommonUtils.printMatToPicture(dest, "storage/emulated/0/warped.jpg");
+        CommonUtils.printMatToPicture(dest, "warped.jpg");
         return dest;
     }
 
@@ -204,9 +212,8 @@ public final class OpenCV {
     }
 
     public static final SCell detectCell(Mat sudokuPlane, Rect roi, TemplateLibrary templateLibrary) {
-        int i = 1;
         Mat contour = extractContour(sudokuPlane.submat(roi));
-        //CommonUtils.printMatToPicture(sudokuPlane.submat(roi), "storage/emulated/0/cell" + i++ + ".jpg");
+        CommonUtils.printMatToPicture(sudokuPlane.submat(roi), "aaa.png");
         if(contour == null) {
             return new SCell(0, 0.0, roi);
         }
@@ -215,16 +222,16 @@ public final class OpenCV {
     }
 
     public static final Mat extractContour(Mat coloredCell) {
-        CommonUtils.printMatToPicture(coloredCell, "storage/emulated/0/coloredCell.jpg");
+        CommonUtils.printMatToPicture(coloredCell, "coloredCell.jpg");
         Mat cell = toGray(coloredCell);
         Mat cellData = getCellData(cell);
-        CommonUtils.printMatToPicture(cellData, "storage/emulated/0/cellData.jpg");
+        CommonUtils.printMatToPicture(cellData, "cellData.jpg");
         Point center = calcCellCentre(cellData);
         Pair<Double, Double> minMaxArea = minMaxArea(cellData);
         double minArea = minMaxArea.first;
         double maxArea = minMaxArea.second;
-        Mat preprocessed = preprocess(toGray(cellData));
-        CommonUtils.printMatToPicture(preprocessed, "storage/emulated/0/preprocessed.jpg");
+        Mat preprocessed = preprocess(cellData);
+        CommonUtils.printMatToPicture(preprocessed, "preprocessed.jpg");
         return findCellContour(preprocessed, center, minArea, maxArea);
     }
 
@@ -246,14 +253,14 @@ public final class OpenCV {
     }
 
     public static final Mat preprocess(Mat input) {
-        Mat equalized = equalizeHist(input);
-        CommonUtils.printMatToPicture(equalized, "storage/emulated/0/equalized.jpg");
+        /*Mat equalized = equalizeHist(input);
+        CommonUtils.printMatToPicture(equalized, "equalized.jpg");
         Mat blurred = gaussianBlur(equalized);
-        CommonUtils.printMatToPicture(equalized, "storage/emulated/0/blurred.jpg");
-        Mat thresholded = threshold(blurred);
-        CommonUtils.printMatToPicture(thresholded, "storage/emulated/0/thresholded.jpg");
+        CommonUtils.printMatToPicture(equalized, "blurred.jpg");*/
+        Mat thresholded = OpenCV.threshold(input);
+        CommonUtils.printMatToPicture(thresholded, "thresholded.jpg");
         Mat inverted = bitwiseNot(thresholded);
-        CommonUtils.printMatToPicture(inverted, "storage/emulated/0/inverted.jpg");
+        CommonUtils.printMatToPicture(inverted, "inverted.jpg");
         return inverted;
     }
 
@@ -265,7 +272,7 @@ public final class OpenCV {
 
     public static final Mat threshold(Mat input) {
         Mat output = new Mat();
-        Imgproc.threshold(input, output, 160, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(input, output, 127, 255, Imgproc.THRESH_BINARY);
         return output;
     }
 
@@ -315,8 +322,9 @@ public final class OpenCV {
     }
 
     public static final Mat copyTo(Mat data, Mat canvas, Rect roi) {
-        Mat cellTarget = new Mat(canvas, roi);
-        data.copyTo(cellTarget);
-        return cellTarget;
+        Mat destinationROI = new Mat(canvas, roi);
+        data.copyTo(destinationROI);
+        //data.copyTo(canvas.rowRange(roi.y, roi.y + (int)roi.size().height).colRange(roi.x, roi.x + (int) roi.size().width));
+        return canvas;
     }
 }
