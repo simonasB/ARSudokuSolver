@@ -22,6 +22,7 @@ public class MainActivityTest {
 
     @Test
     public void bye() {
+
         openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
         onView(withText(R.string.action_settings)).perform(click());
     }

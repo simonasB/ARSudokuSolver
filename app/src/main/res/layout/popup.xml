@@ -20,7 +20,7 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Could not detect sudoku corners. Please press the Scan button again." />
+                android:text="Could not detect or solve detected sudoku. Please press the Rescan button again." />
             <Button
                 android:id="@+id/dismiss"
                 android:layout_width="fill_parent"

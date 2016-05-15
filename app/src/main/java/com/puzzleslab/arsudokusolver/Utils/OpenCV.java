@@ -2,8 +2,10 @@ package com.puzzleslab.arsudokusolver.Utils;
 
 import android.util.Pair;
 
+import com.puzzleslab.arsudokusolver.BuildConfig;
 import com.puzzleslab.arsudokusolver.Modules.SCell;
-import com.puzzleslab.arsudokusolver.Modules.Triplet;
+import com.puzzleslab.arsudokusolver.Modules.SudokuException;
+import com.puzzleslab.arsudokusolver.Modules.TemplateLibrary;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -58,10 +60,10 @@ public final class OpenCV {
     public static final Pair<Integer, Double> matchTemplate(Mat candidate, int number, Mat withNeedle) {
         Mat normedCandidateF = norm(candidate);
         Mat normedNeedleF = norm(withNeedle);
-
-        CommonUtils.printMatToPicture(normedCandidateF, "normedCandidateF.png");
-        CommonUtils.printMatToPicture(normedNeedleF, "normedNeedleF" + number + ".png");
-
+        if (BuildConfig.DEBUG) {
+            SudokuUtils.printMatToPicture(normedCandidateF, "normedCandidateF.png");
+            SudokuUtils.printMatToPicture(normedNeedleF, "normedNeedleF" + number + ".png");
+        }
         int width = candidate.cols() - withNeedle.cols() + 1;
         int height = candidate.rows() - withNeedle.rows() + 1;
         Mat resultImage = new Mat(width, height, CvType.CV_32FC1);
@@ -72,7 +74,7 @@ public final class OpenCV {
     }
 
     public static final Mat norm(Mat mat) {
-        return adaptiveThreshold(dilate(gaussianBlur(mat)), 255, 5); // not sure if this is correct
+        return adaptiveThreshold(dilate(gaussianBlur(mat)), 255, 5);
     }
 
     public static final Mat gaussianBlur(Mat input) {
@@ -114,15 +116,6 @@ public final class OpenCV {
     public static final Mat bitwiseNot(Mat input) {
         Mat output = new Mat();
         Core.bitwise_not(input, output);
-        return output;
-    }
-
-    public static final Mat erode(Mat input) {
-        Mat output = new Mat();
-        Double erSize = 0.0;
-        Mat m = Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(2 * erSize + 1, 2 * erSize + 1),
-                new Point(erSize,erSize));
-        Imgproc.erode(input, output, m);
         return output;
     }
 
@@ -173,15 +166,6 @@ public final class OpenCV {
             }
         };
         Collections.sort(pointsAsList, comparatorBySum);
-        /*List<Point> sortedByDifference = pointsAsList;
-        Comparator<Point> comparatorByDifference = new Comparator<Point>() {
-            @Override
-            public int compare(Point lhs, Point rhs) {
-                return (lhs.x - lhs.y) > (rhs.y - rhs.x) ? 1 : (lhs.x - lhs.y) < (rhs.y - rhs.x) ? -1 : 0;
-            }
-        };
-        Collections.sort(sortedByDifference, comparatorByDifference);
-        */
         Point bottomLeft = pointsAsList.get(0);
         Point topLeft = pointsAsList.get(1);
         Point bottomRight = pointsAsList.get(2);
@@ -203,7 +187,9 @@ public final class OpenCV {
         Mat transformationMatrix = Imgproc.getPerspectiveTransform(srcCorners, destCorners);
         Mat dest = new Mat();
         Imgproc.warpPerspective(input, dest, transformationMatrix, input.size());
-        CommonUtils.printMatToPicture(dest, "warped.jpg");
+        if(BuildConfig.DEBUG) {
+            SudokuUtils.printMatToPicture(dest, "warped.jpg");
+        }
         return dest;
     }
 
@@ -211,9 +197,8 @@ public final class OpenCV {
         return new Size(sudokuSize.width / Parameters.SSIZE, sudokuSize.height / Parameters.SSIZE);
     }
 
-    public static final SCell detectCell(Mat sudokuPlane, Rect roi, TemplateLibrary templateLibrary) {
-        Mat contour = extractContour(sudokuPlane.submat(roi));
-        CommonUtils.printMatToPicture(sudokuPlane.submat(roi), "aaa.png");
+    public static final SCell detectCell(Mat sudokuPlane, Rect roi, TemplateLibrary templateLibrary, int i) throws SudokuException {
+        Mat contour = extractContour(sudokuPlane.submat(roi), i);
         if(contour == null) {
             return new SCell(0, 0.0, roi);
         }
@@ -221,17 +206,23 @@ public final class OpenCV {
         return new SCell(valueAndQuality.first, valueAndQuality.second, roi);
     }
 
-    public static final Mat extractContour(Mat coloredCell) {
-        CommonUtils.printMatToPicture(coloredCell, "coloredCell.jpg");
+    public static final Mat extractContour(Mat coloredCell, int i) {
+        if(BuildConfig.DEBUG) {
+            SudokuUtils.printMatToPicture(coloredCell, "coloredCell.jpg");
+        }
         Mat cell = toGray(coloredCell);
         Mat cellData = getCellData(cell);
-        CommonUtils.printMatToPicture(cellData, "cellData.jpg");
+        if (BuildConfig.DEBUG) {
+            SudokuUtils.printMatToPicture(cellData, "cellData.jpg");
+        }
         Point center = calcCellCentre(cellData);
         Pair<Double, Double> minMaxArea = minMaxArea(cellData);
         double minArea = minMaxArea.first;
         double maxArea = minMaxArea.second;
         Mat preprocessed = preprocess(cellData);
-        CommonUtils.printMatToPicture(preprocessed, "preprocessed.jpg");
+        if (BuildConfig.DEBUG) {
+            SudokuUtils.printMatToPicture(preprocessed, "preprocessed" + i + ".jpg");
+        }
         return findCellContour(preprocessed, center, minArea, maxArea);
     }
 
@@ -253,26 +244,20 @@ public final class OpenCV {
     }
 
     public static final Mat preprocess(Mat input) {
-        /*Mat equalized = equalizeHist(input);
-        CommonUtils.printMatToPicture(equalized, "equalized.jpg");
-        Mat blurred = gaussianBlur(equalized);
-        CommonUtils.printMatToPicture(equalized, "blurred.jpg");*/
         Mat thresholded = OpenCV.threshold(input);
-        CommonUtils.printMatToPicture(thresholded, "thresholded.jpg");
+        if (BuildConfig.DEBUG) {
+            SudokuUtils.printMatToPicture(thresholded, "thresholded.jpg");
+        }
         Mat inverted = bitwiseNot(thresholded);
-        CommonUtils.printMatToPicture(inverted, "inverted.jpg");
+        if(BuildConfig.DEBUG) {
+            SudokuUtils.printMatToPicture(inverted, "inverted.jpg");
+        }
         return inverted;
-    }
-
-    public static final Mat equalizeHist(Mat input) {
-        Mat output = new Mat();
-        Imgproc.equalizeHist(input, output);
-        return output;
     }
 
     public static final Mat threshold(Mat input) {
         Mat output = new Mat();
-        Imgproc.threshold(input, output, 127, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(input, output, 137, 255, Imgproc.THRESH_BINARY);
         return output;
     }
 
@@ -313,18 +298,5 @@ public final class OpenCV {
         }
 
         return candidates.get(candidates.size() - 1).second;
-    }
-
-    public static final Mat copyMat(Mat orig) {
-        Mat dest = new Mat();
-        orig.copyTo(dest);
-        return dest;
-    }
-
-    public static final Mat copyTo(Mat data, Mat canvas, Rect roi) {
-        Mat destinationROI = new Mat(canvas, roi);
-        data.copyTo(destinationROI);
-        //data.copyTo(canvas.rowRange(roi.y, roi.y + (int)roi.size().height).colRange(roi.x, roi.x + (int) roi.size().width));
-        return canvas;
     }
 }

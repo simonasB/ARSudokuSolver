@@ -4,11 +4,17 @@ package com.puzzleslab.arsudokusolver;
  * Created by simonas_b on 3/31/2016.
  */
 import android.os.Environment;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import com.puzzleslab.arsudokusolver.Utils.CommonUtils;
+import com.puzzleslab.arsudokusolver.Activities.MainActivity;
+import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
+import com.puzzleslab.arsudokusolver.Modules.Solution;
+import com.puzzleslab.arsudokusolver.Modules.SudokuException;
+import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opencv.android.OpenCVLoader;
@@ -41,7 +47,7 @@ public class DigitRecognitionTest {
         Mat thr = new Mat();
         Mat gray = new Mat();
         Mat con = new Mat();
-        Mat src = CommonUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/numbers.png", "");
+        Mat src = SudokuUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/numbers.png", "");
         Imgproc.cvtColor(src, gray, Imgproc.COLOR_BGR2GRAY);
         Imgproc.threshold(gray, thr, 200, 255, Imgproc.THRESH_BINARY_INV);
         thr.copyTo(con);
@@ -85,5 +91,14 @@ public class DigitRecognitionTest {
         } catch (java.io.IOException e) {
             Log.e("PictureDemo", "Exception in photoCallback", e);
         }
+    }
+
+    @Rule
+    public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<MainActivity>(MainActivity.class);
+
+    @Test
+    public void testPaintToSolution() throws SudokuException {
+        Mat frame = SudokuUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku.png", "");
+        Mat solution = new Solution(new FramePipeline(frame), activityTestRule.getActivity().getBaseContext()).calculate();
     }
 }

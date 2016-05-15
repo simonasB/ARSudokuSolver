@@ -1,6 +1,5 @@
 package com.puzzleslab.arsudokusolver.Modules;
 
-import com.puzzleslab.arsudokusolver.Utils.CommonUtils;
 import com.puzzleslab.arsudokusolver.Utils.OpenCV;
 
 import org.opencv.core.Mat;
@@ -17,7 +16,6 @@ public class FramePipeline {
     private Mat thresholded;
     private Mat inverted;
     private Mat dilated;
-    private Mat eroded;
 
     public FramePipeline(Mat frame) {
         this.frame = frame;
@@ -28,7 +26,6 @@ public class FramePipeline {
         this.thresholded = OpenCV.adaptiveThreshold(this.blurred, 255, 5);
         this.inverted = OpenCV.bitwiseNot(this.thresholded);
         this.dilated = OpenCV.dilate(inverted);
-        this.eroded = OpenCV.erode(frame);
     }
 
     public Long getStart() {
@@ -37,14 +34,6 @@ public class FramePipeline {
 
     public void setStart(Long start) {
         this.start = start;
-    }
-
-    public Mat getEroded() {
-        return eroded;
-    }
-
-    public void setEroded(Mat eroded) {
-        this.eroded = eroded;
     }
 
     public Mat getDilated() {

@@ -1,16 +1,17 @@
-package com.puzzleslab.arsudokusolver.Utils;
+package com.puzzleslab.arsudokusolver.Modules;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.Log;
 import android.util.Pair;
+
+import com.puzzleslab.arsudokusolver.Utils.OpenCV;
+import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -69,7 +70,6 @@ public class TemplateLibrary {
             } finally {
                 if (br != null) {
                     try {
-                        inputStream.close();
                         br.close();
                     } catch (IOException e) {
                         Log.e(TAG, "Unexpected error occured while closing file.", e);
@@ -85,8 +85,8 @@ public class TemplateLibrary {
         Mat resizedCandidate = OpenCV.resize(candidate, templateSize); // since templates are 25 x 50
         List<Pair<Integer, Double>> results = new ArrayList<>();
         for (int i = 0; i < getDigitsTemplates().size(); i++) {
-            CommonUtils.printMatToPicture(getDigitsTemplates().get(i), "template" + (i + 1) + ".png" );
-            CommonUtils.printMatToPicture(resizedCandidate, "resizedCandidate.png" );
+            SudokuUtils.printMatToPicture(getDigitsTemplates().get(i), "template" + (i + 1) + ".png");
+            SudokuUtils.printMatToPicture(resizedCandidate, "resizedCandidate.png");
             results.add(OpenCV.matchTemplate(resizedCandidate, i + 1, getDigitsTemplates().get(i)));
         }
         Comparator<Pair<Integer, Double>> comparator = new Comparator<Pair<Integer, Double>>() {

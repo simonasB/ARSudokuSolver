@@ -53,7 +53,7 @@ public class BacktrackingSimpleSolver implements SudokuSolver {
             solve(solution, initialSudoku, x, y, i);
         }
         
-        return this._solvedSudoku;
+        return _solvedSudoku;
     }
     /**
      * Solves the Sudoku
@@ -117,10 +117,10 @@ public class BacktrackingSimpleSolver implements SudokuSolver {
      * @param solution array of the solution
      */
     private void convertSudokuMatrixToString(int[][] solution) {
-        this._solvedSudoku = "";
+        _solvedSudoku = "";
         for (int i = 0; i < solution.length; i++)
             for (int j = 0; j < solution[i].length; j++)
-                this._solvedSudoku += solution[i][j];
+                _solvedSudoku += solution[i][j];
     }
 
     private static void validateInitialSudoku(String sudoku) {

@@ -22,10 +22,10 @@ import android.widget.PopupWindow;
 import android.view.ViewGroup.LayoutParams;
 
 import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
-import com.puzzleslab.arsudokusolver.Modules.SCandidate;
+import com.puzzleslab.arsudokusolver.Modules.Solution;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
 import com.puzzleslab.arsudokusolver.R;
-import com.puzzleslab.arsudokusolver.Utils.CommonUtils;
+import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.sudoku);
 
@@ -115,9 +116,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
-                return;
             }
-
             // other 'case' lines to check for other
             // permissions this app might request
         }
@@ -170,23 +169,30 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Log.i(TAG, "Starting to find sudoku");
-        Mat solution = detectSudoku(inputFrame);
-        if (solution == null) {
-            return null;
+        if(scanButton.getVisibility() == View.GONE) {
+            Log.i(TAG, "Starting to find sudoku");
+            Mat solution = detectSudoku(inputFrame);
+            if (solution == null) {
+                return inputFrame.rgba();
+            }
+            return solution;
         }
-        return solution;
+        return inputFrame.rgba();
     }
 
     public Mat detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        //Mat frame = inputFrame.rgba();
-        Mat frame = CommonUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku.png", "");
+        Mat frame = inputFrame.rgba();
+        //Mat frame = SudokuUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku2.jpg", "");
         try {
-            Mat solution = new SCandidate(new FramePipeline(frame), getBaseContext()).calc();
-            return solution;
+            return new Solution(new FramePipeline(frame), getBaseContext()).calculate();
         } catch (SudokuException e) {
             initPopup();
-            scanButton.setVisibility(View.VISIBLE);
+            this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    scanButton.setVisibility(View.VISIBLE);
+                }
+            });
             return null;
         }
     }

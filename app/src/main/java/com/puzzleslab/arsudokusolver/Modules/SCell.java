@@ -1,5 +1,7 @@
 package com.puzzleslab.arsudokusolver.Modules;
 
+import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
+
 import org.opencv.core.Rect;
 
 /**
@@ -10,19 +12,16 @@ public class SCell {
     private double quality;
     private Rect roi;
 
-    public SCell(int value, double quality, Rect roi) {
+    public SCell(int value, double quality, Rect roi) throws SudokuException {
         if (0 <= value && value <= 9 && quality >=0) {
             this.value = value;
             this.quality = quality;
             this.roi = roi;
         }
         else {
-            try {
-                throw new Exception("Cannot SCell object. Requirements are not met. Value: " + value +
-                ". Quality: " + quality + ".");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            SudokuUtils.logAndThrowSudokuException(
+                    "Cannot create SCell object. Requirements are not met. Value: " + value +
+                    ". Quality: " + quality + ".");
         }
     }
 
