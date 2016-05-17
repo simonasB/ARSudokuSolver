@@ -182,8 +182,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public Mat detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat frame = inputFrame.rgba();
-        //Mat frame = SudokuUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku2.jpg", "");
+        //Mat frame = SudokuUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku.png", "");
         try {
+            SudokuUtils.printMatToPicture(frame, "read.png");
             return new Solution(new FramePipeline(frame), getBaseContext()).calculate();
         } catch (SudokuException e) {
             initPopup();

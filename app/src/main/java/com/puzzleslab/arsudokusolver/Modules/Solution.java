@@ -31,7 +31,7 @@ public class Solution {
         this.destCorners = OpenCV.mkCorners(framePipeline.getFrame().size());
         this.sudokuCanvas = OpenCV.warp(framePipeline.getFrame(), corners, destCorners);
         SudokuUtils.printMatToPicture(sudokuCanvas, "warped.png");
-        this.sudokuCanvas = OpenCV.resize(this.sudokuCanvas, new Size(270, 270)); // Resizing that picture width and height could be divided by sudoku row and column count equally
+        this.sudokuCanvas = OpenCV.resize(this.sudokuCanvas, new Size(3600, 2500)); // Resizing that picture width and height could be divided by sudoku row and column count equally
         SudokuUtils.printMatToPicture(sudokuCanvas, "resizedFull.png");
         Size cellSize = OpenCV.mkCellSize(sudokuCanvas.size());
         this.cellWidth = ((int) cellSize.width);

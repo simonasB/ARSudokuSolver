@@ -158,19 +158,26 @@ public final class OpenCV {
     }
 
     public static final MatOfPoint2f mkSortedCorners(MatOfPoint2f points) {
-        List<Point> pointsAsList = points.toList();
+        List<Point> sortedBySum = new ArrayList<>(points.toList());
         Comparator<Point> comparatorBySum = new Comparator<Point>() {
             @Override
             public int compare(Point lhs, Point rhs) {
                 return (lhs.x + lhs.y) > (rhs.y + rhs.x) ? 1 : (lhs.x + lhs.y) < (rhs.y + rhs.x) ? -1 : 0;
             }
         };
-        Collections.sort(pointsAsList, comparatorBySum);
-        Point bottomLeft = pointsAsList.get(0);
-        Point topLeft = pointsAsList.get(1);
-        Point bottomRight = pointsAsList.get(2);
-        Point topRight = pointsAsList.get(3);
-
+        Collections.sort(sortedBySum, comparatorBySum);
+        Point bottomLeft = sortedBySum.get(0);
+        Point corner = sortedBySum.get(1);
+        Point topLeft;
+        Point bottomRight;
+        if(corner.x > corner.y) {
+            bottomRight = sortedBySum.get(1);
+            topLeft = sortedBySum.get(2);
+        } else {
+            topLeft = sortedBySum.get(1);
+            bottomRight = sortedBySum.get(2);
+        }
+        Point topRight = sortedBySum.get(3);
         return new MatOfPoint2f(bottomLeft, bottomRight, topRight, topLeft);
     }
 
