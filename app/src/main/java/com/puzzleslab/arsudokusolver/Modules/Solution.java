@@ -14,8 +14,15 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by Simonas on 2016-04-02.
@@ -80,7 +87,8 @@ public class Solution {
         if(!unsolvedSudoku.matches(".*\\d+.*")) {
             SudokuUtils.logAndThrowSudokuException("Could not detect any numbers.");
         }
-        String solvedSudoku = new BacktrackingKudokuSolver().solve(unsolvedSudoku);
+
+        String solvedSudoku = solveSudokuFromString(unsolvedSudoku);
         if(solvedSudoku.isEmpty()) {
             SudokuUtils.logAndThrowSudokuException("Detected sudoku is unsolvable.");
         }
@@ -96,5 +104,28 @@ public class Solution {
             SudokuUtils.printMatToPicture(solutionMat, "solutionmat.png");
         }
         return solutionMat;
+    }
+
+    private String solveSudokuFromString(final String unsolvedSudoku) throws SudokuException {
+        final String[] solvedSudoku = {""};
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        try {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    solvedSudoku[0] = new BacktrackingKudokuSolver().solve(unsolvedSudoku);
+                }
+            };
+            Future<?> f = service.submit(r);
+            f.get(Parameters.TIMELIMITINSECONDS, TimeUnit.SECONDS);
+        } catch (final TimeoutException e) {
+            Log.e(TAG, "Time limit excedeed while solving sudoku. Time limit: " + Parameters.TIMELIMITINSECONDS, e);
+            throw new SudokuException("Time limit excedeed while solving sudoku.");
+        } catch (InterruptedException | ExecutionException e) {
+            String errorMessage = "Interruption occured while solving sudoku.";
+            Log.e(TAG, errorMessage, e);
+            throw new SudokuException(errorMessage);
+        }
+        return solvedSudoku[0];
     }
 }

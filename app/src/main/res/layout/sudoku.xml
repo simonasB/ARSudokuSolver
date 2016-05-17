@@ -3,7 +3,7 @@
     android:layout_height="fill_parent"
     android:id="@+id/mainLayout">
 
-    <org.opencv.android.JavaCameraView
+    <com.puzzleslab.arsudokusolver.Views.SudokuView
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:visibility="gone"
@@ -14,6 +14,6 @@
         android:layout_height="wrap_content"
         android:text="@string/button_scan"
         android:id="@+id/button_rescan"
-        android:layout_gravity="bottom|center"
+        android:layout_gravity="center|right"
         android:paddingBottom="10dp"/>
 </FrameLayout>

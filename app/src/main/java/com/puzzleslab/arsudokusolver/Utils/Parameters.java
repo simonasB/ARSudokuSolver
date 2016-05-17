@@ -6,4 +6,5 @@ package com.puzzleslab.arsudokusolver.Utils;
 public final class Parameters {
     public static final int SSIZE = 9;
     public static final int CELLCOUNT = SSIZE * SSIZE;
+    public static final int TIMELIMITINSECONDS = 10;
 }

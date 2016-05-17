@@ -59,7 +59,7 @@ public final class SudokuUtils {
             if(detectedScells.get(i).getValue() == 0) {
                 Imgproc.putText(canvas, String.valueOf(solvedSudoku.charAt(i)),
                         new Point(rects.get(i).x + (int) rects.get(i).size().width / 4, rects.get(i).y + (int) rects.get(i).size().height / 1.2),
-                        3, 3, new Scalar(0, 0, 0), 4, 8, false);
+                        3, 3, new Scalar(0, 0, 0), 4, 1, false);
             }
         }
         return canvas;

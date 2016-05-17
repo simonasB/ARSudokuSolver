@@ -9,6 +9,7 @@ import org.opencv.core.Mat;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.os.*;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import com.puzzleslab.arsudokusolver.Modules.Solution;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
 import com.puzzleslab.arsudokusolver.R;
 import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
+import com.puzzleslab.arsudokusolver.Views.SudokuView;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -35,9 +37,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     };
     private static final String TAG = "MainActivity";
 
-    private CameraBridgeViewBase cameraView;
+    private SudokuView cameraView;
     private Button scanButton;
-    Mat solution;
+    private Mat solution;
+    private boolean isCameraSettingsSet = false;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -47,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
                     cameraView.enableView();
-                    //cameraView.setOnTouchListener(MainActivity.this);
                 } break;
                 default:
                 {
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         setContentView(R.layout.sudoku);
 
-        cameraView = (CameraBridgeViewBase) findViewById(R.id.sudoku);
+        cameraView = (SudokuView) findViewById(R.id.sudoku);
         cameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
         cameraView.setCvCameraViewListener(this);
 
@@ -171,6 +173,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        if(!isCameraSettingsSet) {
+            cameraView.setEffect(Camera.Parameters.FLASH_MODE_TORCH);
+            isCameraSettingsSet = true;
+        }
         if (solution == null) {
             if (scanButton.getVisibility() == View.GONE) {
                 Log.i(TAG, "Starting to find sudoku");
