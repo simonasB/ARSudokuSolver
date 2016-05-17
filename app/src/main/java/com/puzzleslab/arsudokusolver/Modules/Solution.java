@@ -31,7 +31,7 @@ public class Solution {
         this.destCorners = OpenCV.mkCorners(framePipeline.getFrame().size());
         this.sudokuCanvas = OpenCV.warp(framePipeline.getFrame(), corners, destCorners);
         SudokuUtils.printMatToPicture(sudokuCanvas, "warped.png");
-        this.sudokuCanvas = OpenCV.resize(this.sudokuCanvas, new Size(3600, 2500)); // Resizing that picture width and height could be divided by sudoku row and column count equally
+        this.sudokuCanvas = OpenCV.resize(this.sudokuCanvas, new Size(1800, 900)); // Resizing that picture width and height could be divided by sudoku row and column count equally
         SudokuUtils.printMatToPicture(sudokuCanvas, "resizedFull.png");
         Size cellSize = OpenCV.mkCellSize(sudokuCanvas.size());
         this.cellWidth = ((int) cellSize.width);
@@ -88,7 +88,8 @@ public class Solution {
 
         Mat paintedSolution = SudokuUtils.paintSolution(sudokuCanvas, solvedSudoku, getCellRects(), detectedScells);
 
-        Mat unwarped = OpenCV.warp(paintedSolution, destCorners, corners);
+        Mat resized = OpenCV.resize(paintedSolution, framePipeline.getWorking().size());
+        Mat unwarped = OpenCV.warp(resized, destCorners, corners);
         Mat solutionMat = OpenCV.copySrcToDestWithMask(unwarped, framePipeline.getFrame(), unwarped);
 
         if(BuildConfig.DEBUG) {

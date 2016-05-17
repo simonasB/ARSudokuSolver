@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private CameraBridgeViewBase cameraView;
     private Button scanButton;
+    Mat solution;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                solution = null;
                 scanButton.setVisibility(View.GONE);
             }
         });
@@ -169,33 +171,38 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        if(scanButton.getVisibility() == View.GONE) {
-            Log.i(TAG, "Starting to find sudoku");
-            Mat solution = detectSudoku(inputFrame);
-            if (solution == null) {
-                return inputFrame.rgba();
+        if (solution == null) {
+            if (scanButton.getVisibility() == View.GONE) {
+                Log.i(TAG, "Starting to find sudoku");
+                solution = detectSudoku(inputFrame);
+                if (solution == null) {
+                    return inputFrame.rgba();
+                }
+                return solution;
             }
-            return solution;
+            return inputFrame.rgba();
         }
-        return inputFrame.rgba();
+        return solution;
     }
 
     public Mat detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat frame = inputFrame.rgba();
         //Mat frame = SudokuUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku.png", "");
+        Mat solution = null;
         try {
             SudokuUtils.printMatToPicture(frame, "read.png");
-            return new Solution(new FramePipeline(frame), getBaseContext()).calculate();
+            solution = new Solution(new FramePipeline(frame), getBaseContext()).calculate();
         } catch (SudokuException e) {
             initPopup();
+        } finally {
             this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     scanButton.setVisibility(View.VISIBLE);
                 }
             });
-            return null;
         }
+        return solution;
     }
 
     private void initPopup() {

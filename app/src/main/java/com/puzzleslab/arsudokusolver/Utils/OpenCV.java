@@ -74,7 +74,7 @@ public final class OpenCV {
     }
 
     public static final Mat norm(Mat mat) {
-        return adaptiveThreshold(dilate(gaussianBlur(mat)), 255, 5);
+        return adaptiveThreshold(dilate(gaussianBlur(mat)), 255, 11);
     }
 
     public static final Mat gaussianBlur(Mat input) {
