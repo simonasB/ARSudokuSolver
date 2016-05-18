@@ -14,7 +14,6 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -37,9 +36,11 @@ public class Solution {
         }
         this.destCorners = OpenCV.mkCorners(framePipeline.getFrame().size());
         this.sudokuCanvas = OpenCV.warp(framePipeline.getFrame(), corners, destCorners);
-        SudokuUtils.printMatToPicture(sudokuCanvas, "warped.png");
         this.sudokuCanvas = OpenCV.resize(this.sudokuCanvas, new Size(1800, 900)); // Resizing that picture width and height could be divided by sudoku row and column count equally
-        SudokuUtils.printMatToPicture(sudokuCanvas, "resizedFull.png");
+        if(!Parameters.CONFIG.isProduction()) {
+            SudokuUtils.printMatToPicture(sudokuCanvas, "warped.png");
+            SudokuUtils.printMatToPicture(sudokuCanvas, "resizedFull.png");
+        }
         Size cellSize = OpenCV.mkCellSize(sudokuCanvas.size());
         this.cellWidth = ((int) cellSize.width);
         this.cellHeight = ((int) cellSize.height);
@@ -59,7 +60,7 @@ public class Solution {
     public List<Rect> getCellRects() {
         if(cellRects == null) {
             List<Rect> cellRects = new ArrayList<>();
-            for (int i = 0; i < Parameters.CELLCOUNT; i++) {
+            for (int i = 0; i < Parameters.CELL_COUNT; i++) {
                 cellRects.add(new Rect(SudokuUtils.getCol(i) * cellWidth, SudokuUtils.getRow(i) * cellHeight, cellWidth, cellHeight));
             }
             this.cellRects = cellRects;
@@ -71,7 +72,7 @@ public class Solution {
         List<SCell> sCells = new ArrayList<>();
         int i = 1;
         for (Rect cellRect: getCellRects()) {
-            if(BuildConfig.DEBUG) {
+            if(!Parameters.CONFIG.isProduction()) {
                 SudokuUtils.printMatToPicture(sudokuCanvas.submat(cellRect), i++ + ".png");
             }
             sCells.add(OpenCV.detectCell(sudokuCanvas, cellRect, templateLibrary, i));
@@ -80,6 +81,7 @@ public class Solution {
     }
 
     public Mat calculate() throws SudokuException {
+        SudokuUtils.printMatToPicture(framePipeline.getWorking(), Parameters.INITIAL_SUDOKU_FILE_NAME);
         List<SCell> detectedScells = getDetectedCells();
 
         String unsolvedSudoku = SudokuUtils.convertDetectedSCellsToString(detectedScells);
@@ -100,9 +102,7 @@ public class Solution {
         Mat unwarped = OpenCV.warp(resized, destCorners, corners);
         Mat solutionMat = OpenCV.copySrcToDestWithMask(unwarped, framePipeline.getFrame(), unwarped);
 
-        if(BuildConfig.DEBUG) {
-            SudokuUtils.printMatToPicture(solutionMat, "solutionmat.png");
-        }
+        SudokuUtils.printMatToPicture(solutionMat, Parameters.SOLUTION_FILE_NAME);
         return solutionMat;
     }
 
@@ -117,9 +117,9 @@ public class Solution {
                 }
             };
             Future<?> f = service.submit(r);
-            f.get(Parameters.TIMELIMITINSECONDS, TimeUnit.SECONDS);
+            f.get(Parameters.TIME_LIMIT_IN_SECONDS, TimeUnit.SECONDS);
         } catch (final TimeoutException e) {
-            Log.e(TAG, "Time limit excedeed while solving sudoku. Time limit: " + Parameters.TIMELIMITINSECONDS, e);
+            Log.e(TAG, "Time limit excedeed while solving sudoku. Time limit: " + Parameters.TIME_LIMIT_IN_SECONDS, e);
             throw new SudokuException("Time limit excedeed while solving sudoku.");
         } catch (InterruptedException | ExecutionException e) {
             String errorMessage = "Interruption occured while solving sudoku.";

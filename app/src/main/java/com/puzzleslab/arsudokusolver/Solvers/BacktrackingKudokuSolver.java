@@ -4,7 +4,7 @@ package com.puzzleslab.arsudokusolver.Solvers;
  * Created by Simonas on 2016-03-05.
  */
 public class BacktrackingKudokuSolver implements SudokuSolver {
-    int[][] R, C;
+    private int[][] R, C;
     private void init() {
         R = new int[324][9];
         C = new int[729][4];

@@ -1,6 +1,7 @@
 package com.puzzleslab.arsudokusolver.Modules;
 
 import com.puzzleslab.arsudokusolver.Utils.OpenCV;
+import com.puzzleslab.arsudokusolver.Utils.Parameters;
 import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 
 import org.opencv.core.Mat;
@@ -22,17 +23,19 @@ public class FramePipeline {
         this.frame = frame;
         this.start = System.nanoTime();
         this.working = OpenCV.copySrcToDestWithMask(frame, new Mat(), frame);
-        SudokuUtils.printMatToPicture(working, "1workingframe.png");
         this.grayed = OpenCV.toGray(frame);
-        SudokuUtils.printMatToPicture(grayed, "1grayedframe.png");
         this.blurred = OpenCV.gaussianBlur(this.grayed);
-        SudokuUtils.printMatToPicture(blurred, "1blurredframe.png");
         this.thresholded = OpenCV.adaptiveThreshold(this.blurred, 255, 5);
-        SudokuUtils.printMatToPicture(thresholded, "1thresholdedframe.png");
         this.inverted = OpenCV.bitwiseNot(this.thresholded);
-        SudokuUtils.printMatToPicture(inverted, "1invertedframe.png");
         this.dilated = OpenCV.dilate(inverted);
-        SudokuUtils.printMatToPicture(dilated, "1dilatedframe.png");
+        if(!Parameters.CONFIG.isProduction()) {
+            SudokuUtils.printMatToPicture(working, "1workingframe.png");
+            SudokuUtils.printMatToPicture(grayed, "1grayedframe.png");
+            SudokuUtils.printMatToPicture(blurred, "1blurredframe.png");
+            SudokuUtils.printMatToPicture(thresholded, "1thresholdedframe.png");
+            SudokuUtils.printMatToPicture(inverted, "1invertedframe.png");
+            SudokuUtils.printMatToPicture(dilated, "1dilatedframe.png");
+        }
     }
 
     public Long getStart() {

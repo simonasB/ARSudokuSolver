@@ -22,12 +22,21 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 import android.view.ViewGroup.LayoutParams;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.sharing.SharedLinkMetadata;
+import com.puzzleslab.arsudokusolver.Modules.Config;
+import com.puzzleslab.arsudokusolver.Modules.DropBoxClientFactory;
 import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
 import com.puzzleslab.arsudokusolver.Modules.Solution;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
 import com.puzzleslab.arsudokusolver.R;
+import com.puzzleslab.arsudokusolver.Tasks.UploadFileTask;
+import com.puzzleslab.arsudokusolver.Utils.Parameters;
 import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 import com.puzzleslab.arsudokusolver.Views.SudokuView;
+
+import java.text.DateFormat;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -50,6 +59,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
                     cameraView.enableView();
+                    Parameters.CONFIG = new Config(
+                            SudokuUtils.getConfigValue(getBaseContext(), "api_url"),
+                            SudokuUtils.getConfigValue(getBaseContext(), "auth_token"),
+                            Boolean.valueOf(SudokuUtils.getConfigValue(getBaseContext(), "is_production")));
+                    DropBoxClientFactory.init(Parameters.CONFIG.getAuthToken());
                 } break;
                 default:
                 {
@@ -83,7 +97,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                solution = null;
+                if(solution != null) {
+                    solution = null;
+                    return;
+                }
                 scanButton.setVisibility(View.GONE);
             }
         });
@@ -184,6 +201,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 if (solution == null) {
                     return inputFrame.rgba();
                 }
+                uploadFile(Parameters.EXTERNAL_STORAGE_PATH + Parameters.INITIAL_SUDOKU_FILE_NAME, "");
+                uploadFile(Parameters.EXTERNAL_STORAGE_PATH + Parameters.SOLUTION_FILE_NAME, "r");
                 return solution;
             }
             return inputFrame.rgba();
@@ -196,7 +215,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         //Mat frame = SudokuUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku.png", "");
         Mat solution = null;
         try {
-            SudokuUtils.printMatToPicture(frame, "read.png");
+            if(!Parameters.CONFIG.isProduction()) {
+                SudokuUtils.printMatToPicture(frame, "read.png");
+            }
             solution = new Solution(new FramePipeline(frame), getBaseContext()).calculate();
         } catch (SudokuException e) {
             initPopup();
@@ -233,5 +254,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 popupWindow.showAtLocation(cameraView, Gravity.CENTER, 0, 0);
             }
         });
+    }
+
+    private void uploadFile(String fileUri, String fileType) {
+        new UploadFileTask(this, DropBoxClientFactory.getClient(), new UploadFileTask.Callback() {
+            @Override
+            public void onUploadComplete(FileMetadata result) {
+                Log.i(TAG, result.getName() + " size " + result.getSize() + " modified " +
+                        DateFormat.getDateTimeInstance().format(result.getClientModified()));
+            }
+            @Override
+            public void onError(Exception e) {
+                Log.e(TAG, "Failed to upload file.", e);
+            }
+        }).execute(fileUri, fileType);
     }
 }

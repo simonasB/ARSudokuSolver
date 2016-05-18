@@ -1,12 +1,14 @@
 package com.puzzleslab.arsudokusolver.Utils;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
 
 import com.puzzleslab.arsudokusolver.Modules.SCell;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
+import com.puzzleslab.arsudokusolver.R;
 
 import org.apache.commons.io.FileUtils;
 import org.opencv.android.Utils;
@@ -23,7 +25,9 @@ import org.opencv.imgproc.Imgproc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by Simonas on 2016-04-02.
@@ -59,7 +63,7 @@ public final class SudokuUtils {
             if(detectedScells.get(i).getValue() == 0) {
                 Imgproc.putText(canvas, String.valueOf(solvedSudoku.charAt(i)),
                         new Point(rects.get(i).x + (int) rects.get(i).size().width / 4, rects.get(i).y + (int) rects.get(i).size().height / 1.2),
-                        3, 3, new Scalar(0, 0, 0), 4, 1, false);
+                        3, 3, new Scalar(0, 0, 0), 8, 8, false);
             }
         }
         return canvas;
@@ -88,7 +92,7 @@ public final class SudokuUtils {
     }
 
     public static final void printMatToPicture(Mat mat, String imgName) {
-        String externalStoragePath = "storage/sdcard1/DCIM/Camera/" + imgName;
+        String externalStoragePath = Parameters.EXTERNAL_STORAGE_PATH + imgName;
         Bitmap bitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(mat, bitmap);
         try {
@@ -110,5 +114,22 @@ public final class SudokuUtils {
 
     public static final int getCol(int i) {
         return i % 9;
+    }
+
+    public static String getConfigValue(Context context, String name) {
+        Resources resources = context.getResources();
+
+        try {
+            InputStream rawResource = resources.openRawResource(R.raw.config);
+            Properties properties = new Properties();
+            properties.load(rawResource);
+            return properties.getProperty(name);
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "Unable to find the config file: " + e.getMessage());
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to open config file.");
+        }
+
+        return null;
     }
 }

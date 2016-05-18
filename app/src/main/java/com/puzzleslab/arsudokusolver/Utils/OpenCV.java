@@ -60,7 +60,7 @@ public final class OpenCV {
     public static final Pair<Integer, Double> matchTemplate(Mat candidate, int number, Mat withNeedle) {
         Mat normedCandidateF = norm(candidate);
         Mat normedNeedleF = norm(withNeedle);
-        if (BuildConfig.DEBUG) {
+        if (!Parameters.CONFIG.isProduction()) {
             SudokuUtils.printMatToPicture(normedCandidateF, "normedCandidateF.png");
             SudokuUtils.printMatToPicture(normedNeedleF, "normedNeedleF" + number + ".png");
         }
@@ -194,7 +194,7 @@ public final class OpenCV {
         Mat transformationMatrix = Imgproc.getPerspectiveTransform(srcCorners, destCorners);
         Mat dest = new Mat();
         Imgproc.warpPerspective(input, dest, transformationMatrix, input.size());
-        if(BuildConfig.DEBUG) {
+        if(!Parameters.CONFIG.isProduction()) {
             SudokuUtils.printMatToPicture(dest, "warped.jpg");
         }
         return dest;
@@ -214,20 +214,16 @@ public final class OpenCV {
     }
 
     public static final Mat extractContour(Mat coloredCell, int i) {
-        if(BuildConfig.DEBUG) {
-            SudokuUtils.printMatToPicture(coloredCell, "coloredCell.jpg");
-        }
         Mat cell = toGray(coloredCell);
         Mat cellData = getCellData(cell);
-        if (BuildConfig.DEBUG) {
-            SudokuUtils.printMatToPicture(cellData, "cellData.jpg");
-        }
         Point center = calcCellCentre(cellData);
         Pair<Double, Double> minMaxArea = minMaxArea(cellData);
         double minArea = minMaxArea.first;
         double maxArea = minMaxArea.second;
         Mat preprocessed = preprocess(cellData);
-        if (BuildConfig.DEBUG) {
+        if(!Parameters.CONFIG.isProduction()) {
+            SudokuUtils.printMatToPicture(coloredCell, "coloredCell.jpg");
+            SudokuUtils.printMatToPicture(cellData, "cellData.jpg");
             SudokuUtils.printMatToPicture(preprocessed, "preprocessed" + i + ".jpg");
         }
         return findCellContour(preprocessed, center, minArea, maxArea);
@@ -252,11 +248,9 @@ public final class OpenCV {
 
     public static final Mat preprocess(Mat input) {
         Mat thresholded = OpenCV.threshold(input);
-        if (BuildConfig.DEBUG) {
-            SudokuUtils.printMatToPicture(thresholded, "thresholded.jpg");
-        }
         Mat inverted = bitwiseNot(thresholded);
-        if(BuildConfig.DEBUG) {
+        if(!Parameters.CONFIG.isProduction()) {
+            SudokuUtils.printMatToPicture(thresholded, "thresholded.jpg");
             SudokuUtils.printMatToPicture(inverted, "inverted.jpg");
         }
         return inverted;

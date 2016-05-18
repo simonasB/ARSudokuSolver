@@ -5,6 +5,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.puzzleslab.arsudokusolver.Utils.OpenCV;
+import com.puzzleslab.arsudokusolver.Utils.Parameters;
 import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 
 import org.opencv.core.Mat;
@@ -85,8 +86,10 @@ public class TemplateLibrary {
         Mat resizedCandidate = OpenCV.resize(candidate, templateSize); // since templates are 25 x 50
         List<Pair<Integer, Double>> results = new ArrayList<>();
         for (int i = 0; i < getDigitsTemplates().size(); i++) {
-            SudokuUtils.printMatToPicture(getDigitsTemplates().get(i), "template" + (i + 1) + ".png");
-            SudokuUtils.printMatToPicture(resizedCandidate, "resizedCandidate.png");
+            if(!Parameters.CONFIG.isProduction()) {
+                SudokuUtils.printMatToPicture(getDigitsTemplates().get(i), "template" + (i + 1) + ".png");
+                SudokuUtils.printMatToPicture(resizedCandidate, "resizedCandidate.png");
+            }
             results.add(OpenCV.matchTemplate(resizedCandidate, i + 1, getDigitsTemplates().get(i)));
         }
         Comparator<Pair<Integer, Double>> comparator = new Comparator<Pair<Integer, Double>>() {
