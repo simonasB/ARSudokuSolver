@@ -118,7 +118,6 @@ public final class SudokuUtils {
 
     public static String getConfigValue(Context context, String name) {
         Resources resources = context.getResources();
-
         try {
             InputStream rawResource = resources.openRawResource(R.raw.config);
             Properties properties = new Properties();
@@ -131,5 +130,15 @@ public final class SudokuUtils {
         }
 
         return null;
+    }
+
+    public static void validateInitialSudoku(String sudoku) {
+        if(sudoku == null || sudoku.isEmpty()) {
+            throw new IllegalArgumentException("String cannot be null or empty.");
+        }
+        if (sudoku.length() != Parameters.SSIZE * Parameters.SSIZE)
+            throw new IllegalArgumentException("Invalid string size. Size should be 81 but is " + sudoku.length() + ".");
+        if (!sudoku.matches("^[.0-9]+$"))
+            throw new IllegalArgumentException("Invalid string content. String should only contain dots '.' or digits.");
     }
 }

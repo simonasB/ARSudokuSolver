@@ -23,7 +23,6 @@ import java.util.UUID;
  * Created by Simonas on 2016-05-18.
  */
 public class UploadFileTask extends AsyncTask<String, Void, FileMetadata> {
-    private final Context mContext;
     private final DbxClientV2 mDbxClient;
     private final Callback mCallback;
     private Exception mException;
@@ -33,8 +32,7 @@ public class UploadFileTask extends AsyncTask<String, Void, FileMetadata> {
         void onError(Exception e);
     }
 
-    public UploadFileTask(Context context, DbxClientV2 dbxClient, Callback callback) {
-        mContext = context;
+    public UploadFileTask(DbxClientV2 dbxClient, Callback callback) {
         mDbxClient = dbxClient;
         mCallback = callback;
     }

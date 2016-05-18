@@ -22,9 +22,7 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 import android.view.ViewGroup.LayoutParams;
 
-import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 import com.puzzleslab.arsudokusolver.Modules.Config;
 import com.puzzleslab.arsudokusolver.Modules.DropBoxClientFactory;
 import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
@@ -128,18 +126,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
+                    Log.d(TAG, "External storage permission granted.");
                 } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    Log.e(TAG, "External storage permission denied.");
                 }
             }
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
     @Override
@@ -201,6 +192,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 if (solution == null) {
                     return inputFrame.rgba();
                 }
+                Log.d(TAG, "Sudoku solved successfully.");
+                Log.d(TAG, "Starting results uploading to Dropbox.");
                 uploadFile(Parameters.EXTERNAL_STORAGE_PATH + Parameters.INITIAL_SUDOKU_FILE_NAME, "");
                 uploadFile(Parameters.EXTERNAL_STORAGE_PATH + Parameters.SOLUTION_FILE_NAME, "r");
                 return solution;
@@ -257,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     private void uploadFile(String fileUri, String fileType) {
-        new UploadFileTask(this, DropBoxClientFactory.getClient(), new UploadFileTask.Callback() {
+        new UploadFileTask(DropBoxClientFactory.getClient(), new UploadFileTask.Callback() {
             @Override
             public void onUploadComplete(FileMetadata result) {
                 Log.i(TAG, result.getName() + " size " + result.getSize() + " modified " +

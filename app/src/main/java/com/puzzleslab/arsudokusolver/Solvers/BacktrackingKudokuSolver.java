@@ -1,5 +1,7 @@
 package com.puzzleslab.arsudokusolver.Solvers;
 
+import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
+
 /**
  * Created by Simonas on 2016-03-05.
  */
@@ -52,6 +54,7 @@ public class BacktrackingKudokuSolver implements SudokuSolver {
     }
     // solve a Sudoku; sudoku is the standard dot/number representation
     public String solve(String sudoku) {
+        SudokuUtils.validateInitialSudoku(sudoku);
         init();
         int i, j, r, c, r2, dir, cand, n = 0, min, hints = 0; // dir=1: forward; dir=-1: backtrack
         String answer = "";

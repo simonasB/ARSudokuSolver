@@ -3,7 +3,6 @@ package com.puzzleslab.arsudokusolver.Modules;
 import android.content.Context;
 import android.util.Log;
 
-import com.puzzleslab.arsudokusolver.BuildConfig;
 import com.puzzleslab.arsudokusolver.Solvers.BacktrackingKudokuSolver;
 import com.puzzleslab.arsudokusolver.Utils.OpenCV;
 import com.puzzleslab.arsudokusolver.Utils.Parameters;

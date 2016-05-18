@@ -1,5 +1,7 @@
 package com.puzzleslab.arsudokusolver.Solvers;
 
+import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
+
 /**
  * Created by Simonas on 2016-03-11.
  */
@@ -25,7 +27,7 @@ public class BacktrackingSimpleSolver implements SudokuSolver {
      */
     @Override
     public String solve(String sudoku) {
-        validateInitialSudoku(sudoku);
+        SudokuUtils.validateInitialSudoku(sudoku);
         
         int[][] solution = new int[SUDOKU_SIZE][SUDOKU_SIZE];
         boolean[][] initialSudoku = new boolean[SUDOKU_SIZE][SUDOKU_SIZE];
@@ -121,12 +123,5 @@ public class BacktrackingSimpleSolver implements SudokuSolver {
         for (int i = 0; i < solution.length; i++)
             for (int j = 0; j < solution[i].length; j++)
                 _solvedSudoku += solution[i][j];
-    }
-
-    private static void validateInitialSudoku(String sudoku) {
-        if (sudoku.length() != SUDOKU_SIZE * SUDOKU_SIZE)
-            throw new IllegalArgumentException("Invalid string size. Size should be 81 but is " + sudoku.length() + ".");
-        if (!sudoku.matches("^[.0-9]+$"))
-            throw new IllegalArgumentException("Invalid string content. String should only contain dots '.' or digits.");
     }
 }
