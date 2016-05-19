@@ -5,6 +5,7 @@
     android:orientation="vertical"
     android:background="@android:color/background_light"
     android:gravity="center">
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,14 +19,15 @@
             android:orientation="vertical"
             android:layout_margin="20dp">
             <TextView
+                android:id="@+id/textview_popupText"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Could not detect or solve detected sudoku. Please press the Rescan button again." />
+                android:text="@string/textview_popup" />
             <Button
-                android:id="@+id/dismiss"
+                android:id="@+id/button_dismiss"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Dismiss" />
+                android:text="@string/button_dismiss" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

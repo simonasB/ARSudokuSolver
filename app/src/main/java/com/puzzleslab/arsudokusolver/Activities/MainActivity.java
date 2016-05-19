@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.PopupWindow;
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(solution != null) {
+                if (solution != null) {
                     solution = null;
                     return;
                 }
@@ -226,24 +227,24 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     private void initPopup() {
-        LayoutInflater layoutInflater = (LayoutInflater)getBaseContext()
-                .getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = layoutInflater.inflate(R.layout.popup, null);
-        final PopupWindow popupWindow = new PopupWindow(
-                popupView,
-                LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT);
-
-        Button btnDismiss = (Button)popupView.findViewById(R.id.dismiss);
-        btnDismiss.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-            }
-        });
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                LayoutInflater layoutInflater = (LayoutInflater)getBaseContext()
+                        .getSystemService(LAYOUT_INFLATER_SERVICE);
+                final View popupView = layoutInflater.inflate(R.layout.popup, (ViewGroup)cameraView.getParent(), false);
+                final PopupWindow popupWindow = new PopupWindow(
+                        popupView,
+                        LayoutParams.WRAP_CONTENT,
+                        LayoutParams.WRAP_CONTENT);
+
+                Button btnDismiss = (Button)popupView.findViewById(R.id.button_dismiss);
+                btnDismiss.setOnClickListener(new Button.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        popupWindow.dismiss();
+                    }
+                });
                 popupWindow.showAtLocation(cameraView, Gravity.CENTER, 0, 0);
             }
         });

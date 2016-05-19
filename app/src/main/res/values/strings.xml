@@ -2,4 +2,6 @@
     <string name="app_name">ARSudokuSolver</string>
     <string name="action_settings">Settings</string>
     <string name="button_scan">rescan</string>
+    <string name="button_dismiss">"Dismiss"</string>
+    <string name="textview_popup">Could not detect or solve detected sudoku. Please press the Rescan button again.</string>
 </resources>
