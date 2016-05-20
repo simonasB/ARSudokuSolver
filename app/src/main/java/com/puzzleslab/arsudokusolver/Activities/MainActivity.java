@@ -1,5 +1,8 @@
 package com.puzzleslab.arsudokusolver.Activities;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -24,18 +27,24 @@ import android.widget.PopupWindow;
 import android.view.ViewGroup.LayoutParams;
 
 import com.dropbox.core.v2.files.FileMetadata;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.puzzleslab.arsudokusolver.Clients.RestClient;
 import com.puzzleslab.arsudokusolver.Modules.Config;
-import com.puzzleslab.arsudokusolver.Modules.DropBoxClientFactory;
+import com.puzzleslab.arsudokusolver.Clients.DropBoxClientFactory;
 import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
 import com.puzzleslab.arsudokusolver.Modules.Solution;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
 import com.puzzleslab.arsudokusolver.R;
 import com.puzzleslab.arsudokusolver.Tasks.UploadFileTask;
+import com.puzzleslab.arsudokusolver.Utils.APIEndpoints;
 import com.puzzleslab.arsudokusolver.Utils.Parameters;
 import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 import com.puzzleslab.arsudokusolver.Views.SudokuView;
 
 import java.text.DateFormat;
+
+import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2{
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -79,6 +88,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        try {
+            sendDataToServer();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -262,5 +276,35 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Log.e(TAG, "Failed to upload file.", e);
             }
         }).execute(fileUri, fileType);
+    }
+
+    private void sendDataToServer() throws JSONException{
+        RequestParams params = new RequestParams();
+        params.put("duration","666");
+        params.put("initial", "TEST");
+        params.put("solved", "TEST");
+        params.put("type", "TEST");
+        RestClient.post(APIEndpoints.CREATE, params, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                // If the response is JSONObject instead of expected JSONArray
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+                // Pull out the first event on the public timeline
+                JSONObject firstEvent = null;
+                String tweetText = "";
+                try {
+                    firstEvent = (JSONObject) timeline.get(0);
+                    tweetText = firstEvent.getString("text");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                // Do something with the response
+                System.out.println(tweetText);
+            }
+        });
     }
 }
