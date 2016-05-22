@@ -10,7 +10,6 @@ import org.opencv.core.Mat;
  * Created by Simonas on 2016-04-02.
  */
 public class FramePipeline {
-    private Long start;
     private Mat frame;
     private Mat working;
     private Mat grayed;
@@ -21,7 +20,6 @@ public class FramePipeline {
 
     public FramePipeline(Mat frame) {
         this.frame = frame;
-        this.start = System.nanoTime();
         this.working = OpenCV.copySrcToDestWithMask(frame, new Mat(), frame);
         this.grayed = OpenCV.toGray(frame);
         this.blurred = OpenCV.gaussianBlur(this.grayed);
@@ -36,14 +34,6 @@ public class FramePipeline {
             SudokuUtils.printMatToPicture(inverted, "1invertedframe.png");
             SudokuUtils.printMatToPicture(dilated, "1dilatedframe.png");
         }
-    }
-
-    public Long getStart() {
-        return start;
-    }
-
-    public void setStart(Long start) {
-        this.start = start;
     }
 
     public Mat getDilated() {

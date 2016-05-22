@@ -35,10 +35,8 @@ import java.util.Properties;
 public final class SudokuUtils {
     private static final String TAG = "SudokuUtils";
 
-    public static final MatOfPoint2f detectSudokuCorners(Mat input, int ratio) {
+    public static final MatOfPoint2f detectSudokuCorners(Mat input) {
         Pair<Double, MatOfPoint> curveWithMaxArea = OpenCV.extractCurveWithMaxArea(OpenCV.coreFindContours(input));
-        /*double expectedMaxArea = Imgproc.contourArea(OpenCV.mkCorners(input.size())) / ratio;
-        if (curveWithMaxArea.first > expectedMaxArea) {*/
         MatOfPoint2f approxCurve = OpenCV.mkApproximation(new MatOfPoint2f(curveWithMaxArea.second.toArray()), 0.02);
         if (OpenCV.has4Sides(approxCurve)) {
             MatOfPoint2f corners = OpenCV.mkSortedCorners(approxCurve);
@@ -52,11 +50,7 @@ public final class SudokuUtils {
             Log.e(TAG, "Detected only " + approxCurve.size() + " shape, but need 1x4.");
             return OpenCV.EmptyCorners;
         }
-        } /*else {
-            Log.e(TAG, "The detected area of interest was too small. Expected: " + expectedMaxArea +
-            ". Was: " + curveWithMaxArea.first);
-            return OpenCV.EmptyCorners;
-        }*/
+        }
 
     public static final Mat paintSolution(Mat canvas, String solvedSudoku, List<Rect> rects, List<SCell> detectedScells) {
         for (int i = 0; i < solvedSudoku.length(); i++) {

@@ -10,7 +10,7 @@ import org.opencv.android.JavaCameraView;
 /**
  * Created by Simonas on 2016-05-17.
  */
-public class SudokuView extends JavaCameraView implements Camera.PictureCallback{
+public class SudokuView extends JavaCameraView{
 
     private static final String TAG = "SudokuView";
 
@@ -26,10 +26,5 @@ public class SudokuView extends JavaCameraView implements Camera.PictureCallback
         } else {
             Log.w(TAG, "Flashlight is not supported on this device.");
         }
-    }
-
-    @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
-
     }
 }

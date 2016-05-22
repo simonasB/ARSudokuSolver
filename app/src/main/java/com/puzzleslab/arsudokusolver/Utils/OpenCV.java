@@ -2,7 +2,6 @@ package com.puzzleslab.arsudokusolver.Utils;
 
 import android.util.Pair;
 
-import com.puzzleslab.arsudokusolver.BuildConfig;
 import com.puzzleslab.arsudokusolver.Modules.SCell;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
 import com.puzzleslab.arsudokusolver.Modules.TemplateLibrary;

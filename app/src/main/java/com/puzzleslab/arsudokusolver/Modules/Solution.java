@@ -28,7 +28,7 @@ import java.util.concurrent.TimeoutException;
 public class Solution {
     public Solution(FramePipeline framePipeline, Context context) throws SudokuException {
         this.framePipeline = framePipeline;
-        this.corners = SudokuUtils.detectSudokuCorners(framePipeline.getDilated(), 30);
+        this.corners = SudokuUtils.detectSudokuCorners(framePipeline.getDilated());
         boolean foundCorners = !corners.empty();
         if(!foundCorners) {
             SudokuUtils.logAndThrowSudokuException("Could not detect sudoku corners.");
@@ -55,6 +55,11 @@ public class Solution {
     private int cellHeight;
     private TemplateLibrary templateLibrary;
     private List<Rect> cellRects;
+    private long sudokuSolvingDuration;
+
+    public long getSudokuSolvingDuration() {
+        return sudokuSolvingDuration;
+    }
 
     public List<Rect> getCellRects() {
         if(cellRects == null) {
@@ -112,7 +117,10 @@ public class Solution {
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
+                    long startTime = System.currentTimeMillis();
                     solvedSudoku[0] = new BacktrackingKudokuSolver().solve(unsolvedSudoku);
+                    long stopTime = System.currentTimeMillis();
+                    sudokuSolvingDuration = stopTime - startTime;
                 }
             };
             Future<?> f = service.submit(r);

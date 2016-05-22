@@ -1,8 +1,5 @@
 package com.puzzleslab.arsudokusolver.Activities;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -26,8 +23,8 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 import android.view.ViewGroup.LayoutParams;
 
-import com.dropbox.core.v2.files.FileMetadata;
-import com.loopj.android.http.JsonHttpResponseHandler;
+import com.dropbox.core.v2.sharing.SharedLinkMetadata;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.puzzleslab.arsudokusolver.Clients.RestClient;
 import com.puzzleslab.arsudokusolver.Modules.Config;
@@ -35,6 +32,8 @@ import com.puzzleslab.arsudokusolver.Clients.DropBoxClientFactory;
 import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
 import com.puzzleslab.arsudokusolver.Modules.Solution;
 import com.puzzleslab.arsudokusolver.Modules.SudokuException;
+import com.puzzleslab.arsudokusolver.Modules.SudokuResult;
+import com.puzzleslab.arsudokusolver.Modules.SudokuType;
 import com.puzzleslab.arsudokusolver.R;
 import com.puzzleslab.arsudokusolver.Tasks.UploadFileTask;
 import com.puzzleslab.arsudokusolver.Utils.APIEndpoints;
@@ -42,7 +41,7 @@ import com.puzzleslab.arsudokusolver.Utils.Parameters;
 import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 import com.puzzleslab.arsudokusolver.Views.SudokuView;
 
-import java.text.DateFormat;
+import java.util.concurrent.ExecutionException;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -58,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Button scanButton;
     private Mat solution;
     private boolean isCameraSettingsSet = false;
+    private SudokuResult sudokuResult;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                             SudokuUtils.getConfigValue(getBaseContext(), "auth_token"),
                             Boolean.valueOf(SudokuUtils.getConfigValue(getBaseContext(), "is_production")));
                     DropBoxClientFactory.init(Parameters.CONFIG.getAuthToken());
+                    RestClient.setBaseUrl(Parameters.CONFIG.getApiUrl());
                 } break;
                 default:
                 {
@@ -88,11 +89,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        try {
-            sendDataToServer();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -112,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             public void onClick(View v) {
                 if (solution != null) {
                     solution = null;
+                    sudokuResult = null;
                     return;
                 }
                 scanButton.setVisibility(View.GONE);
@@ -208,9 +205,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     return inputFrame.rgba();
                 }
                 Log.d(TAG, "Sudoku solved successfully.");
-                Log.d(TAG, "Starting results uploading to Dropbox.");
-                uploadFile(Parameters.EXTERNAL_STORAGE_PATH + Parameters.INITIAL_SUDOKU_FILE_NAME, "");
-                uploadFile(Parameters.EXTERNAL_STORAGE_PATH + Parameters.SOLUTION_FILE_NAME, "r");
+                Log.d(TAG, "Starting to upload results to Dropbox.");
+                sudokuResult.setInitial(uploadFile(Parameters.EXTERNAL_STORAGE_PATH + Parameters.INITIAL_SUDOKU_FILE_NAME));
+                sudokuResult.setSolved(uploadFile(Parameters.EXTERNAL_STORAGE_PATH + Parameters.SOLUTION_FILE_NAME));
+                sendDataToServer();
                 return solution;
             }
             return inputFrame.rgba();
@@ -220,13 +218,22 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public Mat detectSudoku(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat frame = inputFrame.rgba();
-        //Mat frame = SudokuUtils.convertFileToMat(Environment.getExternalStorageDirectory().getAbsolutePath() + "/unsolvedSudoku.png", "");
-        Mat solution = null;
+        Mat solutionCanvas = null;
         try {
             if(!Parameters.CONFIG.isProduction()) {
                 SudokuUtils.printMatToPicture(frame, "read.png");
             }
-            solution = new Solution(new FramePipeline(frame), getBaseContext()).calculate();
+            Solution solution = new Solution(new FramePipeline(frame), getBaseContext());
+            solutionCanvas = solution.calculate();
+            sudokuResult = new SudokuResult();
+            sudokuResult.setDuration(solution.getSudokuSolvingDuration());
+            if(solution.getSudokuSolvingDuration() < 10) {
+                sudokuResult.setType(SudokuType.EASY);
+            } else if(solution.getSudokuSolvingDuration() > 20) {
+                sudokuResult.setType(SudokuType.HARD);
+            } else {
+                sudokuResult.setType(SudokuType.MEDIUM);
+            }
         } catch (SudokuException e) {
             initPopup();
         } finally {
@@ -237,22 +244,22 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 }
             });
         }
-        return solution;
+        return solutionCanvas;
     }
 
     private void initPopup() {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                LayoutInflater layoutInflater = (LayoutInflater)getBaseContext()
+                LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
                         .getSystemService(LAYOUT_INFLATER_SERVICE);
-                final View popupView = layoutInflater.inflate(R.layout.popup, (ViewGroup)cameraView.getParent(), false);
+                final View popupView = layoutInflater.inflate(R.layout.popup, (ViewGroup) cameraView.getParent(), false);
                 final PopupWindow popupWindow = new PopupWindow(
                         popupView,
                         LayoutParams.WRAP_CONTENT,
                         LayoutParams.WRAP_CONTENT);
 
-                Button btnDismiss = (Button)popupView.findViewById(R.id.button_dismiss);
+                Button btnDismiss = (Button) popupView.findViewById(R.id.button_dismiss);
                 btnDismiss.setOnClickListener(new Button.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -264,47 +271,44 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         });
     }
 
-    private void uploadFile(String fileUri, String fileType) {
-        new UploadFileTask(DropBoxClientFactory.getClient(), new UploadFileTask.Callback() {
-            @Override
-            public void onUploadComplete(FileMetadata result) {
-                Log.i(TAG, result.getName() + " size " + result.getSize() + " modified " +
-                        DateFormat.getDateTimeInstance().format(result.getClientModified()));
-            }
-            @Override
-            public void onError(Exception e) {
-                Log.e(TAG, "Failed to upload file.", e);
-            }
-        }).execute(fileUri, fileType);
-    }
-
-    private void sendDataToServer() throws JSONException{
-        RequestParams params = new RequestParams();
-        params.put("duration","666");
-        params.put("initial", "TEST");
-        params.put("solved", "TEST");
-        params.put("type", "TEST");
-        RestClient.post(APIEndpoints.CREATE, params, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                // If the response is JSONObject instead of expected JSONArray
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
-                // Pull out the first event on the public timeline
-                JSONObject firstEvent = null;
-                String tweetText = "";
-                try {
-                    firstEvent = (JSONObject) timeline.get(0);
-                    tweetText = firstEvent.getString("text");
-                } catch (JSONException e) {
-                    e.printStackTrace();
+    private String uploadFile(String fileUri) {
+        try {
+            return new UploadFileTask(DropBoxClientFactory.getClient(), new UploadFileTask.Callback() {
+                @Override
+                public void onUploadComplete(SharedLinkMetadata result, String sharedPhotoUrl) {
+                    Log.i(TAG, "File: " + result.getName() + " succesfully uploaded.");
                 }
 
-                // Do something with the response
-                System.out.println(tweetText);
-            }
-        });
+                @Override
+                public void onError(Exception e) {
+                    Log.e(TAG, "Failed to upload file.", e);
+                }
+            }).execute(fileUri).get().getUrl();
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(TAG, "Failed to upload file: " + fileUri, e);
+        }
+        return null;
+    }
+
+    private void sendDataToServer(){
+        if(sudokuResult.getInitial() != null && sudokuResult.getSolved() != null) {
+            RequestParams params = new RequestParams();
+            params.put("duration", sudokuResult.getDuration());
+            params.put("initial", sudokuResult.getInitial() + "&raw=1");
+            params.put("solved", sudokuResult.getSolved() + "&raw=1");
+            params.put("type", sudokuResult.getType().name());
+            params.setUseJsonStreamer(true);
+            RestClient.post(APIEndpoints.CREATE, params, new AsyncHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                    Log.d(TAG, "Sudoku data succesfully sent to server. Response: " + new String(responseBody));
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                    Log.e(TAG, "Failed to send sudoku data to server. Response: " + new String(responseBody), error);
+                }
+            });
+        }
     }
 }
