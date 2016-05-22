@@ -31,7 +31,7 @@ public class Solution {
         this.corners = SudokuUtils.detectSudokuCorners(framePipeline.getDilated());
         boolean foundCorners = !corners.empty();
         if(!foundCorners) {
-            SudokuUtils.logAndThrowSudokuException("Could not detect sudoku corners.");
+            SudokuUtils.logAndThrowSudokuException(TAG, "Could not detect sudoku corners.");
         }
         this.destCorners = OpenCV.mkCorners(framePipeline.getFrame().size());
         this.sudokuCanvas = OpenCV.warp(framePipeline.getFrame(), corners, destCorners);
@@ -91,12 +91,12 @@ public class Solution {
         String unsolvedSudoku = SudokuUtils.convertDetectedSCellsToString(detectedScells);
         Log.d(TAG, "Detected sudoku: " + unsolvedSudoku);
         if(!unsolvedSudoku.matches(".*\\d+.*")) {
-            SudokuUtils.logAndThrowSudokuException("Could not detect any numbers.");
+            SudokuUtils.logAndThrowSudokuException(TAG, "Could not detect any numbers.");
         }
 
         String solvedSudoku = solveSudokuFromString(unsolvedSudoku);
         if(solvedSudoku.isEmpty()) {
-            SudokuUtils.logAndThrowSudokuException("Detected sudoku is unsolvable.");
+            SudokuUtils.logAndThrowSudokuException(TAG, "Detected sudoku is unsolvable.");
         }
         Log.d(TAG, "Solved sudoku: " + solvedSudoku);
 
@@ -126,12 +126,9 @@ public class Solution {
             Future<?> f = service.submit(r);
             f.get(Parameters.TIME_LIMIT_IN_SECONDS, TimeUnit.SECONDS);
         } catch (final TimeoutException e) {
-            Log.e(TAG, "Time limit excedeed while solving sudoku. Time limit: " + Parameters.TIME_LIMIT_IN_SECONDS, e);
-            throw new SudokuException("Time limit excedeed while solving sudoku.");
+            SudokuUtils.logAndThrowSudokuException(TAG, "Time limit excedeed while solving sudoku. Time limit: " + Parameters.TIME_LIMIT_IN_SECONDS, e);
         } catch (InterruptedException | ExecutionException e) {
-            String errorMessage = "Interruption occured while solving sudoku.";
-            Log.e(TAG, errorMessage, e);
-            throw new SudokuException(errorMessage);
+            SudokuUtils.logAndThrowSudokuException(TAG, "Interruption occured while solving sudoku.");
         }
         return solvedSudoku[0];
     }

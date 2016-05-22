@@ -97,8 +97,13 @@ public final class SudokuUtils {
         }
     }
 
-    public static final void logAndThrowSudokuException(String errorMessage) throws SudokuException {
-        Log.e(TAG, errorMessage);
+    public static final void logAndThrowSudokuException(String tag, String errorMessage, Exception e) throws SudokuException {
+        Log.e(tag, errorMessage, e);
+        throw new SudokuException(errorMessage);
+    }
+
+    public static final void logAndThrowSudokuException(String tag, String errorMessage) throws SudokuException {
+        Log.e(tag, errorMessage);
         throw new SudokuException(errorMessage);
     }
 

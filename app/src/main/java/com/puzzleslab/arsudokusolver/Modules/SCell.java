@@ -8,6 +8,7 @@ import org.opencv.core.Rect;
  * Created by Simonas on 2016-04-03.
  */
 public class SCell {
+    private static final String TAG = "SCell";
     private int value;
     private double quality;
     private Rect roi;
@@ -19,7 +20,7 @@ public class SCell {
             this.roi = roi;
         }
         else {
-            SudokuUtils.logAndThrowSudokuException(
+            SudokuUtils.logAndThrowSudokuException(TAG,
                     "Cannot create SCell object. Requirements are not met. Value: " + value +
                     ". Quality: " + quality + ".");
         }
