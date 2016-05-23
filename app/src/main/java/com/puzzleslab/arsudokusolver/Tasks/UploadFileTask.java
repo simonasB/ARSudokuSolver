@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver.Tasks;
+package com.puzzleslab.arsudokusolver.tasks;
 
 import android.os.AsyncTask;
 

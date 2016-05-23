@@ -1,10 +1,9 @@
-package com.puzzleslab.arsudokusolver.Clients;
+package com.puzzleslab.arsudokusolver.clients;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
-import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
 
 /**
  * Created by Simonas on 2016-05-20.

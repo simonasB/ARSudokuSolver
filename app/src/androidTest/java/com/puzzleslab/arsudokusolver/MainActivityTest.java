@@ -1,11 +1,10 @@
 package com.puzzleslab.arsudokusolver;
 
-import android.support.test.espresso.matcher.RootMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import com.puzzleslab.arsudokusolver.Activities.MainActivity;
+import com.puzzleslab.arsudokusolver.activities.MainActivity;
 
 import org.junit.Rule;
 import org.junit.Test;

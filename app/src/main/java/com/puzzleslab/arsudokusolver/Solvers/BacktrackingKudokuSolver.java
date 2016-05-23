@@ -1,6 +1,6 @@
-package com.puzzleslab.arsudokusolver.Solvers;
+package com.puzzleslab.arsudokusolver.solvers;
 
-import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
+import com.puzzleslab.arsudokusolver.utils.SudokuUtils;
 
 /**
  * Created by Simonas on 2016-03-05.

@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver.Views;
+package com.puzzleslab.arsudokusolver.views;
 
 import android.content.Context;
 import android.hardware.Camera;

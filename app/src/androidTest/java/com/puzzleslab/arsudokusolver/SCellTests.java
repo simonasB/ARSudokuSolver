@@ -2,8 +2,8 @@ package com.puzzleslab.arsudokusolver;
 
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.puzzleslab.arsudokusolver.Modules.SCell;
-import com.puzzleslab.arsudokusolver.Modules.SudokuException;
+import com.puzzleslab.arsudokusolver.modules.SCell;
+import com.puzzleslab.arsudokusolver.modules.SudokuException;
 
 import org.junit.Test;
 import org.opencv.core.Rect;

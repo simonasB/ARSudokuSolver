@@ -1,6 +1,6 @@
-package com.puzzleslab.arsudokusolver.Modules;
+package com.puzzleslab.arsudokusolver.modules;
 
-import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
+import com.puzzleslab.arsudokusolver.utils.SudokuUtils;
 
 import org.opencv.core.Rect;
 

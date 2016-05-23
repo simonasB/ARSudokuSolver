@@ -1,10 +1,10 @@
-package com.puzzleslab.arsudokusolver.Utils;
+package com.puzzleslab.arsudokusolver.utils;
 
 import android.util.Pair;
 
-import com.puzzleslab.arsudokusolver.Modules.SCell;
-import com.puzzleslab.arsudokusolver.Modules.SudokuException;
-import com.puzzleslab.arsudokusolver.Modules.TemplateLibrary;
+import com.puzzleslab.arsudokusolver.modules.SCell;
+import com.puzzleslab.arsudokusolver.modules.SudokuException;
+import com.puzzleslab.arsudokusolver.services.TemplateLibrary;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;

@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver.Activities;
+package com.puzzleslab.arsudokusolver.activities;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -26,20 +26,20 @@ import android.view.ViewGroup.LayoutParams;
 import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.puzzleslab.arsudokusolver.Clients.RestClient;
-import com.puzzleslab.arsudokusolver.Modules.Config;
-import com.puzzleslab.arsudokusolver.Clients.DropBoxClientFactory;
-import com.puzzleslab.arsudokusolver.Modules.FramePipeline;
-import com.puzzleslab.arsudokusolver.Modules.Solution;
-import com.puzzleslab.arsudokusolver.Modules.SudokuException;
-import com.puzzleslab.arsudokusolver.Modules.SudokuResult;
-import com.puzzleslab.arsudokusolver.Modules.SudokuType;
+import com.puzzleslab.arsudokusolver.clients.RestClient;
+import com.puzzleslab.arsudokusolver.modules.Config;
+import com.puzzleslab.arsudokusolver.clients.DropBoxClientFactory;
+import com.puzzleslab.arsudokusolver.services.FramePipeline;
+import com.puzzleslab.arsudokusolver.services.Solution;
+import com.puzzleslab.arsudokusolver.modules.SudokuException;
+import com.puzzleslab.arsudokusolver.modules.SudokuResult;
+import com.puzzleslab.arsudokusolver.modules.SudokuType;
 import com.puzzleslab.arsudokusolver.R;
-import com.puzzleslab.arsudokusolver.Tasks.UploadFileTask;
-import com.puzzleslab.arsudokusolver.Utils.APIEndpoints;
-import com.puzzleslab.arsudokusolver.Utils.Parameters;
-import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
-import com.puzzleslab.arsudokusolver.Views.SudokuView;
+import com.puzzleslab.arsudokusolver.tasks.UploadFileTask;
+import com.puzzleslab.arsudokusolver.utils.APIEndpoints;
+import com.puzzleslab.arsudokusolver.utils.Parameters;
+import com.puzzleslab.arsudokusolver.utils.SudokuUtils;
+import com.puzzleslab.arsudokusolver.views.SudokuView;
 
 import java.util.concurrent.ExecutionException;
 
@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 SudokuUtils.printMatToPicture(frame, "read.png");
             }
             Solution solution = new Solution(new FramePipeline(frame), getBaseContext());
+            solution.prepareDataForCalculation();
             solutionCanvas = solution.calculate();
             sudokuResult = new SudokuResult();
             sudokuResult.setDuration(solution.getSudokuSolvingDuration());

@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver.Clients;
+package com.puzzleslab.arsudokusolver.clients;
 
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.http.OkHttpRequestor;

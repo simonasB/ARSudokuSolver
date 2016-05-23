@@ -7,9 +7,9 @@ package com.puzzleslab.arsudokusolver;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.puzzleslab.arsudokusolver.Solvers.BacktrackingKudokuSolver;
-import com.puzzleslab.arsudokusolver.Solvers.BacktrackingSimpleSolver;
-import com.puzzleslab.arsudokusolver.Solvers.SudokuSolver;
+import com.puzzleslab.arsudokusolver.solvers.BacktrackingKudokuSolver;
+import com.puzzleslab.arsudokusolver.solvers.BacktrackingSimpleSolver;
+import com.puzzleslab.arsudokusolver.solvers.SudokuSolver;
 
 import org.junit.*;
 import org.junit.Assert;

@@ -1,8 +1,8 @@
-package com.puzzleslab.arsudokusolver.Modules;
+package com.puzzleslab.arsudokusolver.services;
 
-import com.puzzleslab.arsudokusolver.Utils.OpenCV;
-import com.puzzleslab.arsudokusolver.Utils.Parameters;
-import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
+import com.puzzleslab.arsudokusolver.utils.OpenCV;
+import com.puzzleslab.arsudokusolver.utils.Parameters;
+import com.puzzleslab.arsudokusolver.utils.SudokuUtils;
 
 import org.opencv.core.Mat;
 

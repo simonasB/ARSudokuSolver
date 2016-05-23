@@ -1,12 +1,14 @@
-package com.puzzleslab.arsudokusolver.Modules;
+package com.puzzleslab.arsudokusolver.services;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.puzzleslab.arsudokusolver.Solvers.BacktrackingKudokuSolver;
-import com.puzzleslab.arsudokusolver.Utils.OpenCV;
-import com.puzzleslab.arsudokusolver.Utils.Parameters;
-import com.puzzleslab.arsudokusolver.Utils.SudokuUtils;
+import com.puzzleslab.arsudokusolver.modules.SCell;
+import com.puzzleslab.arsudokusolver.modules.SudokuException;
+import com.puzzleslab.arsudokusolver.solvers.BacktrackingKudokuSolver;
+import com.puzzleslab.arsudokusolver.utils.OpenCV;
+import com.puzzleslab.arsudokusolver.utils.Parameters;
+import com.puzzleslab.arsudokusolver.utils.SudokuUtils;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
@@ -28,6 +30,21 @@ import java.util.concurrent.TimeoutException;
 public class Solution {
     public Solution(FramePipeline framePipeline, Context context) throws SudokuException {
         this.framePipeline = framePipeline;
+        this.templateLibrary = new TemplateLibrary(context);
+    }
+
+    private static final String TAG = "Solution";
+    private FramePipeline framePipeline;
+    private MatOfPoint2f corners;
+    private MatOfPoint2f destCorners;
+    private Mat sudokuCanvas;
+    private int cellWidth;
+    private int cellHeight;
+    private TemplateLibrary templateLibrary;
+    private List<Rect> cellRects;
+    private long sudokuSolvingDuration;
+
+    public void prepareDataForCalculation() throws SudokuException {
         this.corners = SudokuUtils.detectSudokuCorners(framePipeline.getDilated());
         boolean foundCorners = !corners.empty();
         if(!foundCorners) {
@@ -43,19 +60,7 @@ public class Solution {
         Size cellSize = OpenCV.mkCellSize(sudokuCanvas.size());
         this.cellWidth = ((int) cellSize.width);
         this.cellHeight = ((int) cellSize.height);
-        this.templateLibrary = new TemplateLibrary(context);
     }
-
-    private static final String TAG = "Solution";
-    private FramePipeline framePipeline;
-    private MatOfPoint2f corners;
-    private MatOfPoint2f destCorners;
-    private Mat sudokuCanvas;
-    private int cellWidth;
-    private int cellHeight;
-    private TemplateLibrary templateLibrary;
-    private List<Rect> cellRects;
-    private long sudokuSolvingDuration;
 
     public long getSudokuSolvingDuration() {
         return sudokuSolvingDuration;

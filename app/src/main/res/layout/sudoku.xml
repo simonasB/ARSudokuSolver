@@ -3,7 +3,7 @@
     android:layout_height="fill_parent"
     android:id="@+id/mainLayout">
 
-    <com.puzzleslab.arsudokusolver.Views.SudokuView
+    <com.puzzleslab.arsudokusolver.views.SudokuView
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:visibility="gone"

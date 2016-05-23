@@ -1,8 +1,8 @@
-package com.puzzleslab.arsudokusolver.Utils;
+package com.puzzleslab.arsudokusolver.utils;
 
 import android.os.Environment;
 
-import com.puzzleslab.arsudokusolver.Modules.Config;
+import com.puzzleslab.arsudokusolver.modules.Config;
 
 /**
  * Created by Simonas on 2016-04-02.

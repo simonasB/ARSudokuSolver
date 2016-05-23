@@ -1,4 +1,4 @@
-package com.puzzleslab.arsudokusolver.Utils;
+package com.puzzleslab.arsudokusolver.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -6,8 +6,8 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.Pair;
 
-import com.puzzleslab.arsudokusolver.Modules.SCell;
-import com.puzzleslab.arsudokusolver.Modules.SudokuException;
+import com.puzzleslab.arsudokusolver.modules.SCell;
+import com.puzzleslab.arsudokusolver.modules.SudokuException;
 import com.puzzleslab.arsudokusolver.R;
 
 import org.apache.commons.io.FileUtils;
